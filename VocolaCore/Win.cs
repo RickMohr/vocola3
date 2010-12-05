@@ -120,9 +120,36 @@ namespace Vocola
             return sb.ToString();
         }
 
-        static public void SendKeyEvent(byte vk, bool isKeyDownEvent)
+        static public void SendKeyEvent(byte vk, string keyText, bool isKeyDownEvent)
         {
-            keybd_event(vk, 0, isKeyDownEvent ? 0 : KEYEVENTF_KEYUP, 0);
+            uint scanCode = MapVirtualKeyEx(vk, 0/*MAPVK_VK_TO_VSC*/, InputLanguage.InstalledInputLanguages[0].Handle);
+            if (isKeyDownEvent)
+                Trace.WriteLine(LogLevel.Low, "    Sending '{0}', virtual key {1}, scan code {2}", keyText, vk, scanCode);
+            keybd_event(vk, (byte)scanCode, isKeyDownEvent ? 0 : KEYEVENTF_KEYUP, 0);
+        }
+
+        static public bool GetVirtualKey(char c, out byte virtualKey, out bool shift, out bool ctrl, out bool alt)
+        {
+            virtualKey = 0;
+            shift = ctrl = alt = false;
+            if (c == 10)
+            {
+                // For some reason VkKeyScanEx returns ctrl+chr(13); we don't want ctrl
+                virtualKey = 13;
+                return true;
+            }
+            short result = VkKeyScanEx(c, InputLanguage.InstalledInputLanguages[0].Handle); // YET: active language?
+            if (result == -1)
+                return false;
+            else
+            {
+                virtualKey = (byte)(result & 0xFF);
+                byte modifierKeys = (byte)(result >> 8);
+                shift = ((modifierKeys & 1) > 0);
+                ctrl = ((modifierKeys & 2) > 0);
+                alt = ((modifierKeys & 4) > 0);
+                return true;
+            }
         }
 
         static public void SendButtonEvent(byte vk, bool isButtonDownEvent)
@@ -188,20 +215,48 @@ namespace Vocola
         const uint MOUSEEVENTF_MIDDLEUP   = 0x0040;
         const uint MOUSEEVENTF_WHEEL      = 0x0800;
 
-        [DllImport("user32.dll")]                                           static extern int    GetForegroundWindow();
-        [DllImport("kernel32.dll")]                                         static extern ushort GetUserDefaultLangID();
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)] static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
-        [DllImport("user32.dll", SetLastError=true, CharSet=CharSet.Auto)]  static extern int    GetWindowTextLength(IntPtr hWnd);
-        [DllImport("user32.dll", SetLastError=true)]                        static extern UInt32 GetWindowThreadProcessId(Int32 hWnd, out Int32 lpdwProcessId);
-        [DllImport("kernel32.dll")] [return: MarshalAs(UnmanagedType.Bool)] static extern bool   IsWow64Process(IntPtr hProcess, out bool lpSystemInfo); 
-        [DllImport("user32.dll")]                                           static extern void   keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
-        [DllImport("user32.dll")]                                           static extern void   mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, int dwExtraInfo);
-        [DllImport("kernel32.dll")] [return: MarshalAs(UnmanagedType.Bool)] static extern bool   QueryFullProcessImageName(IntPtr ProcessHandle, [MarshalAs(UnmanagedType.Bool)] bool UseNativeName, StringBuilder ExeName, ref int Size);
-        [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)]   static extern bool   RegisterHotKey(IntPtr hWnd, int id,int fsModifiers,int vlc);
-        [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)]   static extern bool   SetForegroundWindow(IntPtr hWnd);
-        [DllImport("shell32.dll")]                                          static extern int    SHGetKnownFolderPath( [MarshalAs(UnmanagedType.LPStruct)] Guid rfid, uint dwFlags, IntPtr hToken, out IntPtr pszPath );
+        [DllImport("user32.dll")]
+        static extern int GetForegroundWindow();
 
+        [DllImport("kernel32.dll")]
+        static extern ushort GetUserDefaultLangID();
+        
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        static extern int GetWindowTextLength(IntPtr hWnd);
+        
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern UInt32 GetWindowThreadProcessId(Int32 hWnd, out Int32 lpdwProcessId);
+        
+        [DllImport("kernel32.dll")] [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool IsWow64Process(IntPtr hProcess, out bool lpSystemInfo);
+        
+        [DllImport("user32.dll")]
+        static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
 
+        [DllImport("user32.dll")]
+        static extern uint MapVirtualKeyEx(uint uCode, uint uMapType, IntPtr dwhkl);
+
+        [DllImport("user32.dll")]
+        static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, int dwExtraInfo);
+
+        [DllImport("kernel32.dll")] [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool QueryFullProcessImageName(IntPtr ProcessHandle, [MarshalAs(UnmanagedType.Bool)] bool UseNativeName, StringBuilder ExeName, ref int Size);
+        
+        [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vlc);
+        
+        [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool SetForegroundWindow(IntPtr hWnd);
+        
+        [DllImport("shell32.dll")]
+        static extern int SHGetKnownFolderPath([MarshalAs(UnmanagedType.LPStruct)] Guid rfid, uint dwFlags, IntPtr hToken, out IntPtr pszPath);
+        
+        [DllImport("user32.dll")]
+        static extern short VkKeyScanEx(char ch, IntPtr dwhkl);
+        
     }
 
 }
