@@ -126,6 +126,7 @@
     </Compile>
     <Compile Include="EvalAction.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Keystrokes2.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="LogWindow.cs">
       <SubType>Form</SubType>
@@ -157,7 +158,6 @@
       <DependentUpon>TrayIcon.cs</DependentUpon>
     </Compile>
     <Compile Include="Hooks.cs" />
-    <Compile Include="Keystrokes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="AboutBox.resx">
       <SubType>Designer</SubType>
