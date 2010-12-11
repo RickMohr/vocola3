@@ -10,12 +10,12 @@ using System.Windows.Forms; // MessageBox
 
 namespace Vocola
 {
-    public sealed class Hooks
+    public sealed class WindowsHooks
     {
         private WinEventDelegate dEvent;
         private List<IntPtr> HookPointers = new List<IntPtr>();
 
-        public Hooks()
+        public WindowsHooks()
         {
             dEvent = this.WinEvent;
             SetHook(EVENT_SYSTEM_FOREGROUND);
@@ -62,7 +62,7 @@ namespace Vocola
             dEvent = null;
         }
 
-        ~Hooks()
+        ~WindowsHooks()
         {
             Stop();
         }
