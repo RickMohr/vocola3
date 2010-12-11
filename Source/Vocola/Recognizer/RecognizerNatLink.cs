@@ -15,11 +15,13 @@ namespace Vocola
         private string GrammarsFolder = @"C:\Program Files\NatLink\NatLink\MacroSystem";
         //private string GrammarsFolder = @"C:\Temp\NatLinkGrammars";
         private string NatLinkConnectorDllPath = Path.Combine(Application.StartupPath, "NatLinkConnectorC.dll");
+        private int NatLinkToVocolaPort = 9753;
 
         public override void Initialize()
         {
             ReadRegistry();
             CleanGrammarsFolder();
+            NatLinkListener.Start(NatLinkToVocolaPort);
         }
 
         private void ReadRegistry()
@@ -78,9 +80,7 @@ namespace Vocola
                     EmitDictationGrammar();
                     EmitGrammars(commandSet);
                     EmitSequenceRules(commandSet, 0);
-                    //EmitFileMiddle(@"r'C:\Program Files\Vocola 3.1\Bin\NatLinkConnectorC.dll'");
-                    //EmitFileMiddle(moduleName, @"r'C:\Users\Rick\Rick\Technical\Vocola3\OpenSource\GoogleCode 3.1\VocolaCore\bin\Debug\NatLinkConnectorC.dll'");
-                    EmitFileMiddle(moduleName, NatLinkConnectorDllPath);
+                    EmitFileMiddle(moduleName);
                     EmitActivations(commandSet, moduleName);
                     EmitTopCommandActions(commandSet);
                     EmitFileTrailer();
@@ -562,14 +562,14 @@ class ThisGrammar(GrammarBase):
 ");
         }
 
-        private void EmitFileMiddle(string moduleName, string natLinkConnectorDllPath)
+        private void EmitFileMiddle(string moduleName)
         {
             EmitLine(0, "");
             EmitLine(0, "\"\"\"");
             EmitLine(1, "def initialize(self):");
             EmitLine(2, "print 'Loading Vocola commands for {0}'", moduleName);
-            EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", natLinkConnectorDllPath);
-            EmitLine(2, "self.vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(natLinkConnectorDllPath));
+            EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
+            EmitLine(2, "self.vocolaConnector.InitializeConnection({0}, unicode(r'{1}'))", NatLinkToVocolaPort, Path.GetDirectoryName(NatLinkConnectorDllPath));
             //EmitLine(2, "self.vocolaConnector.InitializeConnection()");
             Emit(0, @"
         self.load(self.gramSpec)

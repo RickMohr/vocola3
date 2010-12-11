@@ -11,9 +11,9 @@ namespace Vocola
     public class NatLinkListener
     {
 
-        static public void Start()
+        static public void Start(int port)
         {
-            TcpChannel channel = new TcpChannel(9753);
+            TcpChannel channel = new TcpChannel(port);
             ChannelServices.RegisterChannel(channel, true);
             RemotingConfiguration.RegisterWellKnownServiceType(
                 typeof(NatLinkToVocolaServer), "NatLinkToVocola", WellKnownObjectMode.Singleton);
