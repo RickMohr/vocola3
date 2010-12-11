@@ -1,0 +1,10 @@
+# Sample customizable list of voice shortcuts to frequently-used files
+
+<file> := 
+ ( Temp       = C:\Users\Pat\Temp\temp.txt
+#### Vocola "list" files 
+ | Files      = CommandFile.GetCommandFolder() \files.vch
+ | Folders    = CommandFile.GetCommandFolder() \folders.vch
+ | URLs       = CommandFile.GetCommandFolder() \URLs.vch
+ | Alternates = CommandFile.GetCommandFolder() \termAlternates.vch
+);

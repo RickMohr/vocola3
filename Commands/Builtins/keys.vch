@@ -1,0 +1,67 @@
+# Variable definitions for groups of keystrokes
+
+<key> := <actionKey> | <characterKey>;
+
+### Modifier keys
+
+<modifierKey> := Shift | Control=Ctrl | Alt | Alternate=Alt | Win | Windows=Win;
+
+### Action keys
+
+<actionKey> := <editKey> | <arrowKey> | <mouseButton> | <specialKey>;
+<actionKeyNotArrow> := <editKey> | <mouseButton> | <specialKey>;
+
+<editKey>     := Escape=Esc | Delete=Del | Backspace | Enter | Tab | Tab Key=Tab | Home | End | Page Up=PgUp | Page Down=PgDn;
+<arrowKey>    := Left | Right | Up | Down;
+<mouseButton> := LeftButton | RightButton | MiddleButton | WheelDown | WheelUp;
+<specialKey>  := ContextMenu | Mute=VolumeMute;
+
+### Character keys
+
+<characterKey> := <letterKey> | <numberKey> | <functionKey> | <unicodeKey>
+                | <militaryKey> | <capMilitaryKey> | <symbolKey> | <symbolKeyNickname>;
+
+<characterKeyNotLetter> := <numberKey> | <functionKey> | <unicodeKey>
+                | <militaryKey> | <capMilitaryKey> | <symbolKey> | <symbolKeyNickname>;
+
+<letterKey>   := a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z;
+<numberKey>   := 0..9;
+<functionKey> := F1|F2|F3|F4|F5|F6|F7|F8|F9|F10|F11|F12;
+<unicodeKey>  := Copyright = U+00A9 | Em Dash = U+2014;
+<militaryKey> := 
+  ( Alpha =a | Bravo   =b | Charlie=c | Delta =d | Echo   =e | Foxtrot=f
+  | Golf  =g | Hotel   =h | India  =i | Juliet=j | Kilo   =k | Lima   =l
+  | Mike  =m | November=n | Oscar  =o | Papa  =p | Quebec =q | Romeo  =r
+  | Sierra=s | Tango   =t | Uniform=u | Victor=v | Whiskey=w | Xray   =x
+  | Yankee=y | Zulu    =z
+  );
+<capMilitaryKey> :=
+  ( Cap Alpha =A | Cap Bravo   =B | Cap Charlie=C | Cap Delta =D | Cap Echo   =E | Cap Foxtrot=F
+  | Cap Golf  =G | Cap Hotel   =H | Cap India  =I | Cap Juliet=J | Cap Kilo   =K | Cap Lima   =L
+  | Cap Mike  =M | Cap November=N | Cap Oscar  =O | Cap Papa  =P | Cap Quebec =Q | Cap Romeo  =R
+  | Cap Sierra=S | Cap Tango   =T | Cap Uniform=U | Cap Victor=V | Cap Whiskey=W | Cap Xray   =X
+  | Cap Yankee=Y | Cap Zulu    =Z
+  );
+<symbolKey> :=        # Note '&' omitted because WSR nickname "And" trumps "End"
+  ( '~' | '!' | '@' | '#' | '$' | '%' | '^' | '*' | '(' | ')' | '_' | '+' 
+  | '`' | '-' | '=' | '{' | '}' | '|' | '[' | ']' | '\'
+  | ':' | '"' | ';' | "'" | '<' | '>' | '?' | ',' | '.' | '/'
+  );
+<symbolKeyNickname> :=
+  ( Ampersand = '&'
+  | Bang = '!'
+  | Bar = '|'
+  | (Equals | Equal) = '='
+  | Quote = '"'
+  | Semi = ';'
+  | Slash = '/'
+  | (Space | Space Bar) = Space
+  | (Open  [Paren] | Left  Paren) = '('   # WSR likes "puh-REN"
+  | (Close [Paren] | Right Paren) = ')' 
+  | (Open  Bracket | Left  Bracket) = '[' 
+  | (Close Bracket | Right Bracket) = ']' 
+  | (Open  Brace | Left  Brace) = '{' 
+  | (Close Brace | Right Brace) = '}' 
+  | (Open  Angle [Bracket] | Left  Angle [Bracket] | Less    [Than]) = '<' 
+  | (Close Angle [Bracket] | Right Angle [Bracket] | Greater [Than]) = '>' 
+  );

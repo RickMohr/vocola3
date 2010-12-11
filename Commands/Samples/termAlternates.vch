@@ -1,0 +1,27 @@
+# Register alternate command words to prevent misrecognitions
+# See discussion at http://vocola.net/v3/CommandSequences.asp#Caveat
+
+$using Library.Vocola;
+
+addTermAlternates() :=
+    AddTermAlternate(Back, Pack, Backed)
+    AddTermAlternate(Down, Town)
+    AddTermAlternate(End, And)
+    AddTermAlternate(Find, Fine)
+    AddTermAlternate(Graph, Graf)
+    AddTermAlternate(Here, Your)
+    AddTermAlternate(Hotel, "It Tell")
+    AddTermAlternate(Indent, Intent, Invent, "In Dent", "And Dent", "In Debt")
+    AddTermAlternate(Kill, Till)
+    AddTermAlternate(No, Nope)
+    AddTermAlternate(Paste, Pace, Base, Based)
+    AddTermAlternate(Semi, Any, Me)
+    AddTermAlternate(Set, Said)
+    AddTermAlternate(Slash, Lash)
+    AddTermAlternate(Space, Pace)
+    AddTermAlternate(Start, Star)
+    AddTermAlternate(Ten, Can)
+    AddTermAlternate(Unflag, "On Flag")
+    AddTermAlternate(Unindent, "On Intent")
+    AddTermAlternate(Up, Of)
+    ;
