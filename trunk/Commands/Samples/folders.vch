@@ -1,0 +1,9 @@
+# Sample customizable list of voice shortcuts to frequently-used folders
+# See discussion at http://vocola.net/v3/IncludeStatements.asp
+
+<folder> := 
+ ( Home              = C:\Users\Pat
+ | Downloads         = C:\Users\Pat\Downloads
+ | Pictures          = C:\Users\Pat\Pictures
+ | [Vocola] Commands = CommandFile.GetCommandFolder();
+ );

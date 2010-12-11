@@ -1,0 +1,9 @@
+# Customizable list of voice shortcuts to frequently-visited URLs
+# Used e.g. in browser.vch and _global.vcl
+
+<url> := ( Vocola       = vocola.net
+         | Amazon       = www.Amazon.com
+         | Weather Map  = www.wunderground.com/US/Region/US/2xFronts.html
+         | Maps         = maps.google.com
+         | Kayak        = www.kayak.com
+         );

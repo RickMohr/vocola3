@@ -1,0 +1,166 @@
+# Generic commands for text editing and navigation
+#
+# See devenv.vcl for a sample implementation.
+# It includes this file, providing the functions referenced by the commands below.
+
+### Edit thing
+<edit> := ( Select    =
+          | Copy      = copy()
+          | Duplicate = duplicate()
+          | Kill      = cut()
+          );
+<thing> := ( That       =
+           | Line       = selectLines(1)
+           | Graph      = selectGraf()
+           | (Flow|All) = selectAll()
+           );
+<edit> <thing> = $2 $1;
+
+### By line number
+<n> := 0..99;
+<operation> := ( (Start|Go|Touch) =  
+               | End              = {End}
+               | Mark             = mark()
+               | Paste            = paste()
+               | Enter            = {Enter}
+               | Center           = centerLine()
+               );
+<n> <operation>       = gotoVisibleLine($1) $2;
+<n> <edit>            = gotoVisibleLineExtend($1) $2;
+<n> <edit> <thing>    = gotoVisibleLine($1) $3 $2;
+<n> <edit> <n> Lines  = gotoVisibleLine($1) selectLines($3) $2;
+<n> <edit> <n> Graphs = gotoVisibleLine($1) gotoGrafEnd($3) mark() gotoGrafStart($3) $2;
+
+### Characters
+<editChars> := ( <edit>
+               | Cap       = capitalize()
+               | Up Case   = upcase()
+               | Down Case = downcase()
+               );
+<editChars> <n> = selectChars($2) $1;
+One  Space = shrinkSpace();
+Kill Space = deleteSpace();
+
+### Words
+
+<leftRight> := (Left=- | Right=);
+[One] Word  <leftRight> = moveByWords($1 1);
+<n>   Words <leftRight> = moveByWords($2$1);
+Forwards    <leftRight> = moveByWords($1 4);  # "Four Words"
+
+Word <n> = {Home} moveByWords($1) moveByWords(-1);
+
+<editChars> This Word = moveByWords(1) selectWords(-1) $1;
+<editChars> Word      = selectWords(1)  $1;
+<editChars> <n> Words = selectWords($2) $1;
+<editChars> Forwards  = selectWords(4)  $1;  # "Four Words"
+
+<editBackWord> := ( [Kill]    Back = cut()
+                  | Copy      Back = copy()
+                  | Duplicate Back = duplicate() );
+<editBackWord> Word      = selectWords(-1)  $1;
+<editBackWord> <n> Words = selectWords(-$2) $1;
+<editBackWord> Forwards  = selectWords(-4)  $1;  # "Four Words"
+
+getText(select) := saveCaret() {LeftButton} $select copy() restoreCaret() paste();
+putText(select)     := $select copy() {LeftButton} paste();
+replaceText(select) := $select copy() {LeftButton} saveCaret() paste() $select cut() restoreCaret();
+
+Get Word      = getText(selectWords(1));
+Get <n> Words = getText(selectWords($1));
+Put Word      = putText(selectWords(1));
+Put <n> Words = putText(selectWords($1));
+Replace Word      = replaceText(selectWords(1));
+Replace <n> Words = replaceText(selectWords($1));
+
+#Camel <n> = selectWords(-$1) copy() String.ToCamelCaseWord(Clipboard.GetText());
+#Title <n> = selectWords(-$1) copy() String.ToTitleCaseWord(Clipboard.GetText());
+
+### Lines
+
+Line Start = gotoLineStart();
+Line End   = gotoLineEnd();
+<edit>      Here = gotoLineEndExtend()   $1;
+<edit> Back Here = gotoLineStartExtend() $1;
+       Back Here = gotoLineStartExtend() cut();
+
+Get Here     =     getText(gotoLineEndExtend());
+Put Here     =     putText(gotoLineEndExtend());
+Replace Here = replaceText(gotoLineEndExtend());
+
+<edit> <n> Lines = selectLines($2) $1;
+
+(Line Up | Lineup)     = selectLines(1) cut() {Up}      paste() {Up};
+Line Down              = selectLines(1) cut() {Down}    paste() {Up};
+(Line Up | Lineup) <n> = selectLines(1) cut() {Up_$2}   paste() {Up};
+Line Down          <n> = selectLines(1) cut() {Down_$1} paste() {Up};
+
+New Line = {Enter};
+Newline Indent = addLine();
+Another One = addLine();
+Line Here = {Enter}{Home}{Left};
+(Paragraph|Graph) Here = {Enter_2}{Home}{Left_2};
+Open Line = {Enter_2}{Up};
+Isolate Line = saveCaret() {Home}{Enter}{Down}{Enter} restoreCaret();
+Join Line = joinLine();
+Join [Line] <n>  = Repeat($1, joinLine());
+Join <n> [Lines] = Repeat($1, joinLine());
+Center (Line|Cursor) = centerLine();
+
+### Paragraphs
+Graf Start = gotoGrafStart(1);
+Graf End   = gotoGrafEnd(1);
+Graph Start <n> = gotoGrafStart($1);
+Graph End   <n> = gotoGrafEnd($1);
+<edit>      Graf Here = gotoGrafEndExtend(1)   $1;
+<edit> Back Graf Here = gotoGrafStartExtend(1) $1;
+<edit>      <n> Graphs = gotoGrafEnd($2) gotoGrafStartExtend($2) $1;
+<edit> Back <n> Graphs = gotoGrafStart($2) gotoGrafEndExtend($2) $1;
+
+### Entire "flow"
+(Buffer|Flow) Start = gotoFlowStart();
+(Buffer|Flow) End   = gotoFlowEnd();
+<edit>      Flow Here = gotoFlowEndExtend()   $1;
+<edit> Back Flow Here = gotoFlowStartExtend() $1;
+
+### Copy/Paste
+Paste That = paste();
+(Paste Here | Paster) = {LeftButton} paste();
+
+Replace All = selectAll() delete() paste();
+Copy and Switch = selectAll() copy() Wait(0) switchWindow();
+
+### Indenting
+Indent   <n> = indent($1);
+Unindent <n> = unindent($1);
+Indent   <n> By <n> = selectLines($1) indent($2) {Home};
+Unindent <n> By <n> = selectLines($1) unindent($2) {Home};
+
+### Editing Code
+# (These aren't in editcode.vch because in emacs.vch that doesn't apply to all languages)
+
+Indent (That|Region) = indentCode();
+Indent <n> Lines = selectLines($1) indentCode();
+Indent [One] Line = indentCodeLine();
+
+# ---------------------------------------------------------------------------
+# Navigation
+
+### Line Numbers
+<digit> := 0..9;
+Line [Number] <digit> <digit>                 = gotoLine($1$2);
+Line [Number] <digit> <digit> <digit>         = gotoLine($1$2$3);
+Line [Number] <digit> <digit> <digit> <digit> = gotoLine($1$2$3$4);
+
+### Find/Replace
+Find Down        = findAgain();
+Find Up          = findAgainUp();
+Find Word [Down] = findWord();
+Find Word  Up    = findWordUp();
+Find That [Down] = findSelection();
+Find That  Up    = findSelectionUp();
+Find <n> Words [Down] = selectWords($1) findSelection();
+Find <n> Words  Up    = selectWords($1) findSelectionUp();
+Start Find <_anything> = gotoFlowStart() find($1);
+Find Down  <_anything> = find($1);
+Find Up    <_anything> = findUp($1);

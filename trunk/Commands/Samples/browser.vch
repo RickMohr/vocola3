@@ -1,0 +1,27 @@
+# Sample commands for both IE and Mozilla
+
+$include urls.vch;
+
+AddressBar() := SendSystemKeys({Alt+d});  # IE8 needs SendSystemKeys
+
+Show <url> = AddressBar() http:// $1 {Enter};
+
+(Copy=c | Paste=v) Address = AddressBar() {Ctrl+$1};
+
+New Window = {Ctrl+n};
+Web Search = {Alt+g};
+
+Go (Back | Forward)      = {Browser$1};
+Go (Back | Forward) 1..9 = Repeat($2, {Browser$1} Wait(300));
+Go Home = {BrowserHome};
+Refresh = {BrowserRefresh};
+Refresh Return = {BrowserRefresh}{Enter};
+
+(Bigger=+ | Smaller=-) [Text] 1..4 = {Ctrl+$1_$2};
+
+Find Down = {Ctrl+f};
+
+### Tabs
+
+New Tab = {Ctrl+t};
+Close (Tab|That) = {Ctrl+w};
