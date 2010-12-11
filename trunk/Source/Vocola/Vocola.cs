@@ -21,7 +21,7 @@ namespace Vocola
         static public string Version = "3.1";
         //static public Recognizer TheRecognizer = new RecognizerSapi();
         static public Recognizer TheRecognizer = new RecognizerNatLink();
-        static private WindowsHooks Hooks;
+        static private WindowsHooks TheWindowsHooks;
         static public TrayIcon TrayIcon;
         static public CommandSet SpokenControlNameCommandSet;
 
@@ -66,8 +66,7 @@ namespace Vocola
                 TheRecognizer.Initialize();
                 LaunchGrammarUpdateThread();
                 WatchCommandFolder();
-                Hooks = new WindowsHooks();
-                NatLinkListener.Start();
+                TheWindowsHooks = new WindowsHooks();
                 Application.Run();
                 // See TrayIcon.cs for Exit()
             }
@@ -81,7 +80,7 @@ namespace Vocola
 
         static public void Stop()
         {
-            Hooks.Stop();
+            TheWindowsHooks.Stop();
             AutomationObjectGetter.Cleanup();
             LogWindow.Destroy();
             System.Environment.Exit(0);
@@ -108,9 +107,9 @@ namespace Vocola
             else
             {
                 // Running from source tree
-                FunctionLibraryFolder = Path.Combine(vocolaInstallFolder, @"..\..\Extensions\Library\bin\Debug");
-                CommandBuiltinsFolder = Path.Combine(vocolaInstallFolder, @"..\..\..\Commands\Builtins");
-                CommandSamplesFolder = Path.Combine(vocolaInstallFolder, @"..\..\..\Commands\Samples");
+                FunctionLibraryFolder = Path.Combine(vocolaInstallFolder, @"..\..\..\Extensions\Library\bin\Debug");
+                CommandBuiltinsFolder = Path.Combine(vocolaInstallFolder, @"..\..\..\..\Commands\Builtins");
+                CommandSamplesFolder = Path.Combine(vocolaInstallFolder, @"..\..\..\..\Commands\Samples");
             }
             AppDataFolder = Application.LocalUserAppDataPath;
             AppDataFolder = AppDataFolder.Substring(0, AppDataFolder.IndexOf("Vocola") + 6);

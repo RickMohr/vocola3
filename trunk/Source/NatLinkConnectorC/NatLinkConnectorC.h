@@ -38,15 +38,14 @@ Assembly^ CurrentDomain_AssemblyResolve(Object^ sender, ResolveEventArgs^ args)
     }
 }
 
-void ReallyInitializeConnection()
+void ReallyInitializeConnection(int port)
 {
-    Vocola::NatLinkToVocolaClient::InitializeConnection();
+    Vocola::NatLinkToVocolaClient::InitializeConnection(port);
 }
 
 static bool initialized = false;
 
-extern "C" void __declspec(dllexport) __stdcall InitializeConnection(const wchar_t* vocolaExecutionFolder)
-//extern "C" __declspec(dllexport) void InitializeConnection()
+extern "C" void __declspec(dllexport) __stdcall InitializeConnection(int port, const wchar_t* vocolaExecutionFolder)
 {
     try
     {
@@ -58,7 +57,7 @@ extern "C" void __declspec(dllexport) __stdcall InitializeConnection(const wchar
         AppDomain::CurrentDomain->AssemblyResolve += gcnew ResolveEventHandler(CurrentDomain_AssemblyResolve);
 
         // If InitializeConnection() isn't called in a separate function the assembly load fails before the resolver is established
-        ReallyInitializeConnection();
+        ReallyInitializeConnection(port);
         initialized = true;
     }
     catch (Exception^ ex)
