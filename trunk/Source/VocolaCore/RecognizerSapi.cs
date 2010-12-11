@@ -63,6 +63,8 @@ namespace Vocola
             DictationWeightForCommandSequences = (float)key.GetValue("DictationWeightForCommandSequences", 1E-10F);
         }
 
+        public override bool RunDevelopmentVersionFromProgramFiles { get { return true; } }
+
         // ---------------------------------------------------------------------
         // Exit gracefully if WSR dies
 
@@ -95,7 +97,7 @@ namespace Vocola
         // ---------------------------------------------------------------------
         // Entry points
 
-        public override void UpdateGrammars(VocolaContext context)
+        public override void ContextChanged(VocolaContext context)
         {
             try
             {

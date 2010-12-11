@@ -15,12 +15,12 @@ using System.Windows.Forms;
 
 namespace Vocola
 {
-    
+
     public class Vocola
     {
         static public string Version = "3.1";
-        static public Recognizer TheRecognizer = new RecognizerSapi();
-        //static public Recognizer NatLinkRecognizer = new RecognizerNatLink();
+        //static public Recognizer TheRecognizer = new RecognizerSapi();
+        static public Recognizer TheRecognizer = new RecognizerNatLink();
         static private Hooks Hooks;
         static public TrayIcon TrayIcon;
         static public CommandSet SpokenControlNameCommandSet;
@@ -55,8 +55,7 @@ namespace Vocola
                 LogWindow.Create();
                 SetFolderNames();
                 CreateDefaultUserFoldersIfNotYetChosen();
-                //NatLinkRecognizer.Initialize();
-                VocolaExtension.VocolaApi       = new VocolaApi();
+                VocolaExtension.VocolaApi = new VocolaApi();
                 VocolaExtension.VocolaDictation = new VocolaDictation();
                 Extensions.Load();
                 InitializeBaseUsingSet(BaseUsingSetCode, CustomBaseUsingSet);
@@ -68,7 +67,7 @@ namespace Vocola
                 LaunchGrammarUpdateThread();
                 WatchCommandFolder();
                 Hooks = new Hooks();
-                //NatLinkListener.Start();
+                NatLinkListener.Start();
                 Application.Run();
                 // See TrayIcon.cs for Exit()
             }
@@ -91,33 +90,46 @@ namespace Vocola
         static private void SetFolderNames()
         {
             string vocolaInstallFolder = Path.GetFullPath(Path.Combine(Application.StartupPath, @".."));
-            if (Application.StartupPath.Contains(@"Users"))
+            bool runningDevelopmentVersion = Application.StartupPath.Contains(@"Users");
+            if (runningDevelopmentVersion && TheRecognizer.RunDevelopmentVersionFromProgramFiles)
             {
                 if (Win.Is64Bit())
                     vocolaInstallFolder = @"C:\Program Files (x86)\Vocola" + Version;
                 else
                     vocolaInstallFolder = @"C:\Program Files\Vocola " + Version;
             }
-            CommandBuiltinsFolder = Path.Combine(vocolaInstallFolder, @"Commands\Builtins");
-            CommandSamplesFolder  = Path.Combine(vocolaInstallFolder, @"Commands\Samples");
-            FunctionLibraryFolder = Path.Combine(vocolaInstallFolder, "FunctionLibrary");
+            if (!runningDevelopmentVersion || TheRecognizer.RunDevelopmentVersionFromProgramFiles)
+            {
+                // Running from Program Files folder
+                FunctionLibraryFolder = Path.Combine(vocolaInstallFolder, "FunctionLibrary");
+                CommandBuiltinsFolder = Path.Combine(vocolaInstallFolder, @"Commands\Builtins");
+                CommandSamplesFolder = Path.Combine(vocolaInstallFolder, @"Commands\Samples");
+            }
+            else
+            {
+                // Running from source tree
+                FunctionLibraryFolder = Path.Combine(vocolaInstallFolder, @"..\..\Extensions\Library\bin\Debug");
+                CommandBuiltinsFolder = Path.Combine(vocolaInstallFolder, @"..\..\..\Commands\Builtins");
+                CommandSamplesFolder = Path.Combine(vocolaInstallFolder, @"..\..\..\Commands\Samples");
+            }
             AppDataFolder = Application.LocalUserAppDataPath;
             AppDataFolder = AppDataFolder.Substring(0, AppDataFolder.IndexOf("Vocola") + 6);
         }
 
         static private void ReadRegistry()
         {
-			RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryKeyName);
-			Trace.LevelThreshold       = (LogLevel)(int)key.GetValue("LogLevel"                  , (int)LogLevel.Error);//Low
-            Trace.ShowTimings          = ((int)         key.GetValue("ShowTimingInLogMessages"   , 0)) > 0;
-            Trace.ShouldLogToFile      = ((int)         key.GetValue("ShouldLogToFile"           , 0)) > 0;//1
-            CommandFolder              = (string)       key.GetValue("CommandFolderPath"         , null);
-            ExtensionFolder            = (string)       key.GetValue("ExtensionFolderPath"       , null);
-            BaseUsingSetCode = (BaseUsingSetOption)(int)key.GetValue("BaseUsingSetCode"          , (int)BaseUsingSetOption.Vocola3);
-            CustomBaseUsingSet         = ((string)      key.GetValue("CustomBaseUsingSet"        , "")).Replace(" ","");
-            CommandSequencesEnabled    = ((int)         key.GetValue("UseCommandSequences"       , 0)) > 0;
-            MaxSequencedCommands       = (int)          key.GetValue("MaxSequencedCommands"      , 6);
-            RequireControlNamePrefix   = ((int)         key.GetValue("RequireControlNamePrefix"  , 0)) > 0;
+            RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryKeyName);
+            Trace.LevelThreshold = (LogLevel)(int)key.GetValue("LogLevel", (int)LogLevel.Error);//Low
+            Trace.ShowTimings = ((int)key.GetValue("ShowTimingInLogMessages", 0)) > 0;
+            Trace.ShouldLogToFile = ((int)key.GetValue("ShouldLogToFile", 0)) > 0;//1
+            //CommandFolder = (string)key.GetValue("CommandFolderPath", null);
+            CommandFolder = @"C:\Users\Rick\Documents\Vocola3\CommandsNatLink";
+            ExtensionFolder = (string)key.GetValue("ExtensionFolderPath", null);
+            BaseUsingSetCode = (BaseUsingSetOption)(int)key.GetValue("BaseUsingSetCode", (int)BaseUsingSetOption.Vocola3);
+            CustomBaseUsingSet = ((string)key.GetValue("CustomBaseUsingSet", "")).Replace(" ", "");
+            CommandSequencesEnabled = ((int)key.GetValue("UseCommandSequences", 0)) > 0;
+            MaxSequencedCommands = (int)key.GetValue("MaxSequencedCommands", 6);
+            RequireControlNamePrefix = ((int)key.GetValue("RequireControlNamePrefix", 0)) > 0;
             AutomationObjectGetterPort = (int)key.GetValue("AutomationObjectGetterPort", 1649);
 
             RegistryKey msKey = Registry.CurrentUser.CreateSubKey(RegistryKeyNameMicrosoft);
@@ -126,7 +138,7 @@ namespace Vocola
 
         static private void CreateDefaultUserFoldersIfNotYetChosen()
         {
-			RegistryKey mainRegistryKey = Registry.CurrentUser.CreateSubKey(RegistryKeyName);
+            RegistryKey mainRegistryKey = Registry.CurrentUser.CreateSubKey(RegistryKeyName);
             string defaultVocolaUserFolder = Path.Combine(Win.GetCurrentUserDocumentsFolder(), "Vocola3");
             if (CommandFolder == null)
             {
@@ -173,7 +185,7 @@ namespace Vocola
                 mainRegistryKey.SetValue("ExtensionFolderPath", defaultExtensionsFolder);
             }
         }
-                
+
         static public void InitializeBaseUsingSet(BaseUsingSetOption option, string customBaseUsingSet)
         {
             BaseUsingSet = new List<string>();
@@ -283,9 +295,9 @@ namespace Vocola
                     {
                         Trace.InitializeTimer();
                         Trace.WriteSeparator();
-                        if (contextChanged)  Trace.WriteLine(LogLevel.Low, "Context changed ({0})", context);
+                        if (contextChanged) Trace.WriteLine(LogLevel.Low, "Context changed ({0})", context);
                         if (commandsChanged) Trace.WriteLine(LogLevel.Low, "Commands changed");
-                        TheRecognizer.UpdateGrammars(context);
+                        TheRecognizer.ContextChanged(context);
                         GrammarContext = context;
                         Trace.WriteLine(LogLevel.Low, "Done building grammar");
                     }
@@ -299,14 +311,14 @@ namespace Vocola
                 }
             }
         }
-        
+
         // ---------------------------------------------------------------------
         // Load any changed command files
 
         static private bool UpdateCommands(VocolaContext context)
         {
-            bool changed = UpdateCommands(CommandFolder        , context.AppName);
-            changed      = UpdateCommands(CommandBuiltinsFolder, context.AppName) || changed;
+            bool changed = UpdateCommands(CommandFolder, context.AppName);
+            changed = UpdateCommands(CommandBuiltinsFolder, context.AppName) || changed;
             return changed;
         }
 
@@ -341,9 +353,8 @@ namespace Vocola
                         {
                             LoadedFile loadedFile = LoadedFile.Get(pathname, true/*isTopLevel*/, isBuiltinsFolder);
                             changed = loadedFile.LoadCommandsIfNecessary(isAppFile ? appName : null) || changed;
-                            //if (changed)
-                                //TheRecognizer.CommandFileChanged(loadedFile);
-                                //NatLinkRecognizer.CommandFileChanged(loadedFile);
+                            if (changed)
+                                TheRecognizer.CommandFileChanged(loadedFile);
                         }
                     }
                 }
@@ -375,13 +386,13 @@ namespace Vocola
 
     public class LoadedFile
     {
-        public  string     Pathname; 
-        public  string     Filename; 
-        public  bool       IsBuiltinsFile; 
-        public  DateTime   TimeLoaded;
-        public  CommandSet CommandSet;
-        public  List<string> IncludedFiles;
-        public  List<VocolaErrorInfo> Errors;
+        public string Pathname;
+        public string Filename;
+        public bool IsBuiltinsFile;
+        public DateTime TimeLoaded;
+        public CommandSet CommandSet;
+        public List<string> IncludedFiles;
+        public List<VocolaErrorInfo> Errors;
 
         static public Dictionary<string, LoadedFile> LoadedFiles = new Dictionary<string, LoadedFile>();
 
@@ -519,11 +530,11 @@ namespace Vocola
                     return false;
                 }
             }
-            for (Match match = ParseErrorRegex.Match(e.Message); match.Success; match = match.NextMatch()) 
+            for (Match match = ParseErrorRegex.Match(e.Message); match.Success; match = match.NextMatch())
             {
                 string message = match.Groups[1].Value;
-                string line    = match.Groups[2].Value;
-                string column  = match.Groups[3].Value;
+                string line = match.Groups[2].Value;
+                string column = match.Groups[3].Value;
                 Trace.LogException(new FileLineColumn(filename, line, column), message);
             }
             return false;
@@ -543,7 +554,7 @@ namespace Vocola
                 if (loadedFile.CommandSet != null)
                     loadedFile.CommandSet.ClearCachedRules();
         }
-            
+
     }
 
     // ---------------------------------------------------------------------
@@ -581,7 +592,7 @@ namespace Vocola
     public class InternalException : Exception
     {
         public InternalException(string message, params object[] arguments)
-            : base(String.Format(message, arguments)) {}
+            : base(String.Format(message, arguments)) { }
     }
 
     public class ActionException : Exception
