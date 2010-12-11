@@ -34,6 +34,7 @@ Assembly^ CurrentDomain_AssemblyResolve(Object^ sender, ResolveEventArgs^ args)
     catch (Exception^ ex)
     {
         MessageBox::Show(ex->Message);
+        return nullptr;
     }
 }
 
@@ -51,7 +52,7 @@ extern "C" void __declspec(dllexport) __stdcall InitializeConnection(const wchar
     {
         if (initialized)
             return;
-        wcscpy(VocolaExecutionFolder, vocolaExecutionFolder);
+        wcscpy_s(VocolaExecutionFolder, vocolaExecutionFolder);
 
         // The executing AppDomain's "CodeBase" is the Python executable folder, so we have to specify how to find assemblies
         AppDomain::CurrentDomain->AssemblyResolve += gcnew ResolveEventHandler(CurrentDomain_AssemblyResolve);

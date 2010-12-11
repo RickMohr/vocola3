@@ -99,89 +99,89 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutBox.cs">
+    <Compile Include="UI\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AboutBox.Designer.cs">
+    <Compile Include="UI\AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="ActionRunner.cs" />
-    <Compile Include="AutomationObjectGetter.cs" />
-    <Compile Include="BuiltinCommandGroup.cs" />
-    <Compile Include="CommandSet.cs" />
-    <Compile Include="CommandSetClasses.cs" />
-    <Compile Include="CommandSetParse.cs" />
-    <Compile Include="Correction.cs">
+    <Compile Include="Actions\ActionRunner.cs" />
+    <Compile Include="Extensions\AutomationObjectGetter.cs" />
+    <Compile Include="Commands\BuiltinCommandGroup.cs" />
+    <Compile Include="Commands\CommandSet.cs" />
+    <Compile Include="Commands\CommandSetClasses.cs" />
+    <Compile Include="Commands\CommandSetParse.cs" />
+    <Compile Include="Dictation\Correction.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Correction.Designer.cs">
+    <Compile Include="Dictation\Correction.Designer.cs">
       <DependentUpon>Correction.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dictation.cs" />
-    <Compile Include="DictationShortcuts.cs">
+    <Compile Include="Dictation\Dictation.cs" />
+    <Compile Include="Dictation\DictationShortcuts.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DictationShortcuts.Designer.cs">
+    <Compile Include="Dictation\DictationShortcuts.Designer.cs">
       <DependentUpon>DictationShortcuts.cs</DependentUpon>
     </Compile>
-    <Compile Include="EvalAction.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="NatLinkListener.cs" />
+    <Compile Include="Actions\EvalAction.cs" />
+    <Compile Include="Extensions\Extensions.cs" />
+    <Compile Include="Recognizer\NatLinkListener.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
-    <Compile Include="LogWindow.cs">
+    <Compile Include="UI\LogWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="LogWindow.Designer.cs">
+    <Compile Include="UI\LogWindow.Designer.cs">
       <DependentUpon>LogWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="MyVocolaAnalyzer.cs" />
-    <Compile Include="Options.cs">
+    <Compile Include="Parser\MyVocolaAnalyzer.cs" />
+    <Compile Include="UI\Options.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Options.Designer.cs">
+    <Compile Include="UI\Options.Designer.cs">
       <DependentUpon>Options.cs</DependentUpon>
     </Compile>
-    <Compile Include="PersistWindowState.cs">
+    <Compile Include="UI\PersistWindowState.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Recognizer.cs" />
-    <Compile Include="RecognizerNatLink.cs" />
-    <Compile Include="RecognizerSapi.cs" />
-    <Compile Include="SapiErrors.cs" />
-    <Compile Include="SapiXmlClasses.cs" />
-    <Compile Include="SortableBindingList.cs" />
-    <Compile Include="Thunk.cs" />
+    <Compile Include="Recognizer\Recognizer.cs" />
+    <Compile Include="Recognizer\RecognizerNatLink.cs" />
+    <Compile Include="Recognizer\RecognizerSapi.cs" />
+    <Compile Include="Recognizer\SapiErrors.cs" />
+    <Compile Include="Recognizer\SapiXmlClasses.cs" />
+    <Compile Include="UI\SortableBindingList.cs" />
+    <Compile Include="Actions\Thunk.cs" />
     <Compile Include="Trace.cs" />
-    <Compile Include="TrayIcon.cs">
+    <Compile Include="UI\TrayIcon.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TrayIcon.Designer.cs">
+    <Compile Include="UI\TrayIcon.Designer.cs">
       <DependentUpon>TrayIcon.cs</DependentUpon>
     </Compile>
-    <Compile Include="Hooks.cs" />
-    <Compile Include="Keystrokes.cs" />
+    <Compile Include="WindowsHooks.cs" />
+    <Compile Include="Actions\Keystrokes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="AboutBox.resx">
+    <EmbeddedResource Include="UI\AboutBox.resx">
       <SubType>Designer</SubType>
       <DependentUpon>AboutBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Correction.resx">
+    <EmbeddedResource Include="Dictation\Correction.resx">
       <SubType>Designer</SubType>
       <DependentUpon>Correction.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DictationShortcuts.resx">
+    <EmbeddedResource Include="Dictation\DictationShortcuts.resx">
       <SubType>Designer</SubType>
       <DependentUpon>DictationShortcuts.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LogWindow.resx">
+    <EmbeddedResource Include="UI\LogWindow.resx">
       <SubType>Designer</SubType>
       <DependentUpon>LogWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Options.resx">
+    <EmbeddedResource Include="UI\Options.resx">
       <SubType>Designer</SubType>
       <DependentUpon>Options.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TrayIcon.resx">
+    <EmbeddedResource Include="UI\TrayIcon.resx">
       <SubType>Designer</SubType>
       <DependentUpon>TrayIcon.cs</DependentUpon>
     </EmbeddedResource>
@@ -206,14 +206,13 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Utilities.cs" />
-    <Compile Include="ActionVariable.cs" />
+    <Compile Include="Actions\ActionVariable.cs" />
     <Compile Include="Vocola.cs" />
-    <Compile Include="VocolaAnalyzer.cs" />
-    <Compile Include="VocolaAPI.cs" />
-    <Compile Include="VocolaApplication.cs" />
-    <Compile Include="VocolaConstants.cs" />
-    <Compile Include="VocolaParser.cs" />
-    <Compile Include="VocolaTokenizer.cs" />
+    <Compile Include="Parser\VocolaAnalyzer.cs" />
+    <Compile Include="Extensions\VocolaAPI.cs" />
+    <Compile Include="Parser\VocolaConstants.cs" />
+    <Compile Include="Parser\VocolaParser.cs" />
+    <Compile Include="Parser\VocolaTokenizer.cs" />
     <Compile Include="Win.cs" />
   </ItemGroup>
   <ItemGroup>

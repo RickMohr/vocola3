@@ -21,7 +21,7 @@ namespace Vocola
         static public string Version = "3.1";
         //static public Recognizer TheRecognizer = new RecognizerSapi();
         static public Recognizer TheRecognizer = new RecognizerNatLink();
-        static private Hooks Hooks;
+        static private WindowsHooks Hooks;
         static public TrayIcon TrayIcon;
         static public CommandSet SpokenControlNameCommandSet;
 
@@ -46,7 +46,7 @@ namespace Vocola
         static public int AutomationObjectGetterPort;
 
         [STAThread]
-        static public void Start()
+        static public void Main()
         {
             try
             {
@@ -66,7 +66,7 @@ namespace Vocola
                 TheRecognizer.Initialize();
                 LaunchGrammarUpdateThread();
                 WatchCommandFolder();
-                Hooks = new Hooks();
+                Hooks = new WindowsHooks();
                 NatLinkListener.Start();
                 Application.Run();
                 // See TrayIcon.cs for Exit()
