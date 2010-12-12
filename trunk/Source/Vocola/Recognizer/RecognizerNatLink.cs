@@ -13,9 +13,8 @@ namespace Vocola
     public class RecognizerNatLink : Recognizer
     {
         private string GrammarsFolder = @"C:\Program Files\NatLink\NatLink\MacroSystem";
-        //private string GrammarsFolder = @"C:\Temp\NatLinkGrammars";
-        private string NatLinkConnectorDllPath = Path.Combine(Application.StartupPath, "NatLinkConnectorC.dll");
         private int NatLinkToVocolaPort = 9753;
+        private string NatLinkConnectorDllPath = Path.Combine(Application.StartupPath, "NatLinkConnectorC.dll");
 
         public override void Initialize()
         {
