@@ -121,8 +121,8 @@ namespace Vocola
             Trace.LevelThreshold = (LogLevel)(int)key.GetValue("LogLevel", (int)LogLevel.Error);//Low
             Trace.ShowTimings = ((int)key.GetValue("ShowTimingInLogMessages", 0)) > 0;
             Trace.ShouldLogToFile = ((int)key.GetValue("ShouldLogToFile", 0)) > 0;//1
-            //CommandFolder = (string)key.GetValue("CommandFolderPath", null);
-            CommandFolder = @"C:\Users\Rick\Documents\Vocola3\CommandsNatLink";
+            CommandFolder = (string)key.GetValue("CommandFolderPath", null);
+            //CommandFolder = @"C:\Users\Rick\Documents\Vocola3\CommandsNatLink";
             ExtensionFolder = (string)key.GetValue("ExtensionFolderPath", null);
             BaseUsingSetCode = (BaseUsingSetOption)(int)key.GetValue("BaseUsingSetCode", (int)BaseUsingSetOption.Vocola3);
             CustomBaseUsingSet = ((string)key.GetValue("CustomBaseUsingSet", "")).Replace(" ", "");
