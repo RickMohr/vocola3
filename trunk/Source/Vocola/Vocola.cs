@@ -122,7 +122,6 @@ namespace Vocola
             Trace.ShowTimings = ((int)key.GetValue("ShowTimingInLogMessages", 0)) > 0;
             Trace.ShouldLogToFile = ((int)key.GetValue("ShouldLogToFile", 0)) > 0;//1
             CommandFolder = (string)key.GetValue("CommandFolderPath", null);
-            //CommandFolder = @"C:\Users\Rick\Documents\Vocola3\CommandsNatLink";
             ExtensionFolder = (string)key.GetValue("ExtensionFolderPath", null);
             BaseUsingSetCode = (BaseUsingSetOption)(int)key.GetValue("BaseUsingSetCode", (int)BaseUsingSetOption.Vocola3);
             CustomBaseUsingSet = ((string)key.GetValue("CustomBaseUsingSet", "")).Replace(" ", "");
@@ -298,7 +297,6 @@ namespace Vocola
                         if (commandsChanged) Trace.WriteLine(LogLevel.Low, "Commands changed");
                         TheRecognizer.ContextChanged(context);
                         GrammarContext = context;
-                        Trace.WriteLine(LogLevel.Low, "Done building grammar");
                     }
                     GrammarUpdateWaitHandle.WaitOne();
                 }
@@ -552,6 +550,13 @@ namespace Vocola
             foreach (LoadedFile loadedFile in LoadedFiles.Values)
                 if (loadedFile.CommandSet != null)
                     loadedFile.CommandSet.ClearCachedRules();
+        }
+
+        public bool ShouldActivateCommands()
+        {
+            bool isDisabledBuiltinsFile = (IsBuiltinsFile && BuiltinCommandGroup.IsDisabled(Filename));
+            bool hasCommands = (CommandSet != null && CommandSet.Commands.Count > 0);
+            return (hasCommands && !isDisabledBuiltinsFile);
         }
 
     }

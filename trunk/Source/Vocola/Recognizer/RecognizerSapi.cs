@@ -111,6 +111,7 @@ namespace Vocola
             try
             {
                 ReallyUpdateGrammars(context);
+                Trace.WriteLine(LogLevel.Low, "Done building grammar");
             }
             catch (Exception e)
             {
