@@ -470,11 +470,7 @@ namespace Vocola
             Trace.WriteLine(LogLevel.Medium, "Enabling commands:");
             foreach (LoadedFile loadedFile in LoadedFile.LoadedFiles.Values)
             {
-                // Skip disabled builtins
-                if (loadedFile.IsBuiltinsFile && BuiltinCommandGroup.IsDisabled(loadedFile.Filename))
-                    continue;
-                // Gather active commands
-                if (loadedFile.CommandSet != null)
+                if (loadedFile.ShouldActivateCommands())
                     loadedFile.CommandSet.Activate(this);
             }
             if (Vocola.RequireControlNamePrefix)

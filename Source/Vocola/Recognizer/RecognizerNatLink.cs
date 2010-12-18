@@ -53,7 +53,8 @@ namespace Vocola
                 string grammarFilename = Path.Combine(GrammarsFolder, moduleName + "_vcl.py");
                 grammarFilename = grammarFilename.Replace('@', '_');
                 moduleName = moduleName.ToLower();
-                EmitGrammarFile(loadedFile.CommandSet, grammarFilename, moduleName);
+                if (loadedFile.ShouldActivateCommands())
+                    EmitGrammarFile(loadedFile.CommandSet, grammarFilename, moduleName);
             }
             catch (Exception e)
             {
@@ -187,7 +188,6 @@ namespace Vocola
                 else if (term is MenuTerm)
                 {
                     MenuTerm mt = (MenuTerm)term;
-                    FlattenMenu(mt);
                     Emit(0, "(");
                     EmitMenuGrammar(mt);
                     Emit(0, ") ");
@@ -202,6 +202,7 @@ namespace Vocola
 
         private void EmitMenuGrammar(MenuTerm menu)
         {
+            FlattenMenu(menu);
             bool isFirst = true;
             foreach (Command command in menu.Alternatives)
             {
@@ -248,8 +249,9 @@ namespace Vocola
                 EmitLine(2, "{0} = <{1}>;", any, ruleNamesString);
             else
                 EmitLine(2, "{0} = <any_{1}>|<{2}>;", any, commandSet.ParentCommandSet.SequenceRuleNumber, ruleNamesString);
+            int nSeq = (Vocola.CommandSequencesEnabled ? Vocola.MaxSequencedCommands : 0);
             EmitLine(2, "<sequence_{0}> exported = {1};",
-                commandSet.SequenceRuleNumber, GetRepeatGrammar(any, Vocola.MaxSequencedCommands));
+                commandSet.SequenceRuleNumber, GetRepeatGrammar(any, nSeq));
         }
 
         private string GetRepeatGrammar(string spec, int count)
@@ -348,6 +350,7 @@ namespace Vocola
 
             EmitLine(1, "# {0}", command.TermsToString());
             EmitLine(1, "def {0}(self, words, fullResults):", functionName);
+            //EmitLine(2, "print 'Recognized: {0}'", command.TermsToString()); 
             EmitOptionalTermFixup(terms);
             EmitLine(2, "variableTerms = ''");
 
@@ -356,7 +359,7 @@ namespace Vocola
             {
                 if (IsAnythingTerm(term))
                 {
-                    EmitLine(2, "fullResults = combineDictationWords(fullResults)");
+                    EmitLine(2, "fullResults = self.combineDictationWords(fullResults)");
                     EmitLine(2, "i = {0} + self.firstWord", termNumber);
                     EmitLine(2, "if (len(fullResults) <= i) or (fullResults[i][1] != 'dgndictation'):");
                     EmitLine(3, "fullResults.insert(i, ['','dummy'])");
@@ -396,7 +399,7 @@ namespace Vocola
 
         private void EmitOptionalTermFixup(ArrayList terms)
         {
-            int termNumber = 0;
+            int termNumber = -1;
             foreach (LanguageObject term in terms)
             {
                 termNumber++;
@@ -499,7 +502,7 @@ namespace Vocola
             ArrayList terms = command.Terms;
 
             // Find the array index of the first non-optional term
-            int index = 0;
+            int index = -1;
             do
                 index++;
             while
@@ -579,6 +582,31 @@ class ThisGrammar(GrammarBase):
         private void EmitFileTrailer()
         {
             Emit(0, @"
+    # Massage recognition results to make a single entry for each <dgndictation> result.
+
+    def combineDictationWords(self, fullResults):
+        i = 0
+        inDictation = 0
+        while i < len(fullResults):
+            if fullResults[i][1] == 'dgndictation':
+                # This word came from a 'recognize anything' rule.
+                # Convert to written form if necessary, e.g. '@\at-sign' --> '@'
+                word = fullResults[i][0]
+                backslashPosition = string.find(word, '\\')
+                if backslashPosition > 0:
+                    word = word[:backslashPosition]
+                if inDictation:
+                    fullResults[i-1] = [fullResults[i-1][0] + ' ' + word, 'dgndictation']
+                    del fullResults[i]
+                else:
+                    fullResults[i] = [word, 'dgndictation']
+                    i = i + 1
+                inDictation = 1
+            else:
+                i = i + 1
+                inDictation = 0
+        return fullResults
+
 thisGrammar = ThisGrammar()
 thisGrammar.initialize()
 
@@ -619,7 +647,7 @@ def unload():
                             alternatives = (term as VariableTerm).Variable.Menu.Alternatives;
                         Command alternative = GetAlternative(alternatives, word);
                         actions = alternative.Actions;
-                        variableTermDisplay = actions.ToString();
+                        variableTermDisplay = alternative.ToString();
                     }
                     Trace.WriteLine(LogLevel.Low, "    ${0}:  {1}", variableTermIndex, variableTermDisplay);
                     variableTermActions.Add(actions);
