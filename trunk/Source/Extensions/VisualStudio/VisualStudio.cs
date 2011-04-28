@@ -142,16 +142,19 @@ namespace Library
                 selection.CharRight(false, 1);
                 bool moveToEndOfDocument = false;
                 while (count-- > 0)
-                    if (selection.FindText(@"^[ \t]*$", (int)vsFindOptions.vsFindOptionsRegularExpression))
-                        selection.CharRight(false, 2); // move to start of next line
-                    else
-                    {
-                        moveToEndOfDocument = true;
-                        break;
-                    }
+					if (selection.FindText(@"^[ \t]*$", (int)vsFindOptions.vsFindOptionsRegularExpression))
+					{
+						if (DteVersion < 10)
+							selection.CharRight(false, 2); // move to start of next line
+					}
+					else
+					{
+						moveToEndOfDocument = true;
+						break;
+					}
                 if (moveToEndOfDocument)
                     selection.EndOfDocument(false);
-                else
+                else if (DteVersion < 10)
                     selection.CharLeft(false, 1);
             }
             else if (count < 0) // Move backward
@@ -163,7 +166,8 @@ namespace Library
                         selection.StartOfDocument(false);
                         break;
                     }
-                selection.CharLeft(false, 1);
+				if (DteVersion < 10)
+					selection.CharLeft(false, 1);
             }
             if (extend)
                 selection.MoveToAbsoluteOffset(initialOffset, true);
@@ -301,11 +305,25 @@ namespace Library
                         VocolaApi.LogMessage(LogLevel.Low, "Reestablishing connection to Visual Studio");
                     }
                 }
-                if (dte2 == null)
-                    dte2 = (DTE2)VocolaApi.GetAutomationObject("VisualStudio.DTE");
-                return dte2;
+				if (dte2 == null)
+					dte2 = (DTE2)VocolaApi.GetAutomationObject("VisualStudio.DTE");
+				if (dte2 == null)
+					dte2 = (DTE2)VocolaApi.GetAutomationObject("VisualStudio.DTE.9.0");
+				if (dte2 == null)
+					dte2 = (DTE2)VocolaApi.GetAutomationObject("VisualStudio.DTE.8.0");
+				return dte2;
             }
         }
+
+		static private int DteVersion
+		{
+			get
+			{
+				float version = 0;
+				float.TryParse(DTE2.Version, out version);
+				return (int)version;
+			}
+		}
 
         static private void FocusOnCurrentDocument()
         {
