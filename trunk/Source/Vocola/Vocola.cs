@@ -19,8 +19,8 @@ namespace Vocola
     public class Vocola
     {
         static public string Version = "3.1";
-        //static public Recognizer TheRecognizer = new RecognizerSapi();
-        static public Recognizer TheRecognizer = new RecognizerNatLink();
+        static public Recognizer TheRecognizer = new RecognizerSapi();
+        //static public Recognizer TheRecognizer = new RecognizerNatLink();
         static private WindowsHooks TheWindowsHooks;
         static public TrayIcon TrayIcon;
         static public CommandSet SpokenControlNameCommandSet;
@@ -93,7 +93,7 @@ namespace Vocola
             if (runningDevelopmentVersion && TheRecognizer.RunDevelopmentVersionFromProgramFiles)
             {
                 if (Win.Is64Bit())
-                    vocolaInstallFolder = @"C:\Program Files (x86)\Vocola" + Version;
+                    vocolaInstallFolder = @"C:\Program Files (x86)\Vocola " + Version;
                 else
                     vocolaInstallFolder = @"C:\Program Files\Vocola " + Version;
             }

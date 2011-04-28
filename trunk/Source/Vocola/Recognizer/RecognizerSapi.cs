@@ -45,7 +45,7 @@ namespace Vocola
             TheRecognizer.RecognitionForOtherContext += new _ISpeechRecoContextEvents_RecognitionForOtherContextEventHandler(RecognitionForOtherContext);
 
             Dictation.Initialize(TheRecognizer, this, DictationGrammarId);
-            LaunchWsrMonitorThread();
+			//LaunchWsrMonitorThread();
         }
 
         static private void ReadRegistry()
@@ -63,7 +63,7 @@ namespace Vocola
             DictationWeightForCommandSequences = (float)key.GetValue("DictationWeightForCommandSequences", 1E-10F);
         }
 
-        public override bool RunDevelopmentVersionFromProgramFiles { get { return true; } }
+        //public override bool RunDevelopmentVersionFromProgramFiles { get { return true; } }
 
         // ---------------------------------------------------------------------
         // Exit gracefully if WSR dies
