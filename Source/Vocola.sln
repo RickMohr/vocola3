@@ -1,11 +1,20 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", "{8F978F57-33D9-416C-A4EC-CDE38487470F}"
+	ProjectSection(SolutionItems) = preProject
+		ThirdParty\Interop.SpeechLib.5.3.dll = ThirdParty\Interop.SpeechLib.5.3.dll
+		ThirdParty\ManagedWinAPI-0.3\ManagedWinapi.dll = ThirdParty\ManagedWinAPI-0.3\ManagedWinapi.dll
+		ThirdParty\Vista Api.dll = ThirdParty\Vista Api.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{9F38664E-F1E0-4C00-BA42-9106C9A43B2C}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VocolaExtension", "VocolaExtension\VocolaExtension.csproj", "{DC4C207D-7A69-4093-B486-61CFD2241F3F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio", "Extensions\VisualStudio\VisualStudio.csproj", "{A85EC387-CF28-4170-A561-CB5FEE365D35}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SapiHelper", "SapiHelper\SapiHelper.vcproj", "{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SapiHelper", "SapiHelper\SapiHelper.vcxproj", "{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VocolaFunctionLibrary", "Extensions\Library\VocolaFunctionLibrary.csproj", "{4E2202A4-10B6-4ED8-B978-CD84ED176CE3}"
 EndProject
@@ -27,18 +36,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grammatica-1.4-Runtime", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomationObjectGetterServer", "AutomationObjectGetter\AutomationObjectGetterServer.csproj", "{C6F8F80C-72D3-47BF-B540-CF084ED58BDD}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", "{8F978F57-33D9-416C-A4EC-CDE38487470F}"
-	ProjectSection(SolutionItems) = preProject
-		ThirdParty\Interop.SpeechLib.5.3.dll = ThirdParty\Interop.SpeechLib.5.3.dll
-		ThirdParty\ManagedWinAPI-0.3\ManagedWinapi.dll = ThirdParty\ManagedWinAPI-0.3\ManagedWinapi.dll
-		ThirdParty\Vista Api.dll = ThirdParty\Vista Api.dll
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NatLinkConnectorCSharp", "NatLinkConnectorCSharp\NatLinkConnectorCSharp.csproj", "{B8DE1AC1-4521-4E03-96A3-678A01F9D9A7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{9F38664E-F1E0-4C00-BA42-9106C9A43B2C}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NatLinkConnectorC", "NatLinkConnectorC\NatLinkConnectorC.vcproj", "{DB86494F-9DF0-4213-96F2-5B98E089CA41}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NatLinkConnectorC", "NatLinkConnectorC\NatLinkConnectorC.vcxproj", "{DB86494F-9DF0-4213-96F2-5B98E089CA41}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vocola", "Vocola\Vocola.csproj", "{FD978287-EF75-4E10-8707-9EEFECD6E128}"
 EndProject
@@ -235,10 +235,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{DC4C207D-7A69-4093-B486-61CFD2241F3F} = {9F38664E-F1E0-4C00-BA42-9106C9A43B2C}
 		{A85EC387-CF28-4170-A561-CB5FEE365D35} = {9F38664E-F1E0-4C00-BA42-9106C9A43B2C}
 		{4E2202A4-10B6-4ED8-B978-CD84ED176CE3} = {9F38664E-F1E0-4C00-BA42-9106C9A43B2C}
 		{4957FC04-1E91-41C3-9121-04811D994453} = {9F38664E-F1E0-4C00-BA42-9106C9A43B2C}
 		{71F34732-AA61-4894-8B22-CBAD1F71594E} = {9F38664E-F1E0-4C00-BA42-9106C9A43B2C}
-		{DC4C207D-7A69-4093-B486-61CFD2241F3F} = {9F38664E-F1E0-4C00-BA42-9106C9A43B2C}
 	EndGlobalSection
 EndGlobal
