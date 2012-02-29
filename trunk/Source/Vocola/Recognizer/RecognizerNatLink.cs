@@ -12,7 +12,7 @@ namespace Vocola
 
     public class RecognizerNatLink : Recognizer
     {
-        private string GrammarsFolder = @"C:\Program Files\NatLink\NatLink\MacroSystem";
+        private string GrammarsFolder = @"C:\Programs\NatLink\NatLink\MacroSystem";
         private int NatLinkToVocolaPort = 9753;
         private string NatLinkConnectorDllPath = Path.Combine(Application.StartupPath, "NatLinkConnectorC.dll");
 
@@ -249,7 +249,7 @@ namespace Vocola
                 EmitLine(2, "{0} = <{1}>;", any, ruleNamesString);
             else
                 EmitLine(2, "{0} = <any_{1}>|<{2}>;", any, commandSet.ParentCommandSet.SequenceRuleNumber, ruleNamesString);
-            int nSeq = (Vocola.CommandSequencesEnabled ? Vocola.MaxSequencedCommands : 0);
+			int nSeq = 0;// (Vocola.CommandSequencesEnabled ? Vocola.MaxSequencedCommands : 0);
             EmitLine(2, "<sequence_{0}> exported = {1};",
                 commandSet.SequenceRuleNumber, GetRepeatGrammar(any, nSeq));
         }
@@ -259,7 +259,7 @@ namespace Vocola
             // Create grammar for "spec" repeated "count" times, e.g. <any_3> [<any_3> [<any_3>]];
             if (count > 99)
                 return spec + "+";
-            string result = spec;
+            string result = spec;if
             while (count-- > 1)
                 result = String.Format("{0} [{1}]", spec, result);
             return result;
@@ -267,8 +267,9 @@ namespace Vocola
 
         private void EmitActivations(CommandSet commandSet, string moduleName)
         {
-            bool moduleHasPrefix = false;
-            string prefix = "";
+			bool moduleIsGlobal = moduleName.StartsWith("_");
+			bool moduleHasPrefix = false;
+			string prefix = "";
             Match match = Regex.Match(moduleName, "^(.+?)_.*");
             if (match.Success)
             {
@@ -277,7 +278,7 @@ namespace Vocola
             }
             EmitLine(0, "");
             EmitLine(1, "def gotBegin(self,moduleInfo):");
-            if (commandSet.IsTopLevel())
+			if (moduleIsGlobal)
                 EmitLine(2, "window = moduleInfo[2]");
             else
             {
