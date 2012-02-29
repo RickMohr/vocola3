@@ -19,8 +19,8 @@ namespace Vocola
     public class Vocola
     {
         static public string Version = "3.2";
-        static public Recognizer TheRecognizer = new RecognizerSapi();
-        //static public Recognizer TheRecognizer = new RecognizerNatLink();
+        //static public Recognizer TheRecognizer = new RecognizerSapi();
+        static public Recognizer TheRecognizer = new RecognizerNatLink();
         static private WindowsHooks TheWindowsHooks;
         static public TrayIcon TrayIcon;
         static public CommandSet SpokenControlNameCommandSet;
