@@ -65,6 +65,8 @@ namespace Vocola
 
         //public override bool RunDevelopmentVersionFromProgramFiles { get { return true; } }
 
+		public virtual bool SupportsDictation { get { return true; } }
+
         // ---------------------------------------------------------------------
         // Exit gracefully if WSR dies
 

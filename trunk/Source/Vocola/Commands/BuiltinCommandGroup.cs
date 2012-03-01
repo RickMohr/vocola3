@@ -9,7 +9,7 @@ namespace Vocola
     class BuiltinCommandGroup
     {
 
-        public  string Filename;
+		public string Filename { get; private set; }
         private string description;
         private bool   enable;
 
@@ -42,17 +42,21 @@ namespace Vocola
             Groups = new List<BuiltinCommandGroup>();
             Groups.Add(new BuiltinCommandGroup("_ui.vcl"         , "Vocola user interface - control it"));
             Groups.Add(new BuiltinCommandGroup("_commandFile.vcl", "Command files - open them"));
-            Groups.Add(new BuiltinCommandGroup("_dictation.vcl"  , "Dictation - modify dictated phrase"));
             Groups.Add(new BuiltinCommandGroup("Vocola.vcl"      , "Vocola correction panel - choose alternatives"));
             Groups.Add(new BuiltinCommandGroup("_keys.vcl"       , "Writing commands - insert keystrokes with Vocola syntax"));
-        }
+			if (Vocola.TheRecognizer.SupportsDictation)
+				Groups.Add(new BuiltinCommandGroup("_dictation.vcl", "Dictation - modify dictated phrase"));
+		}
 
         public static bool IsDisabled(string filename)
         {
             foreach (BuiltinCommandGroup group in Groups)
                 if (filename == group.Filename)
                     return !group.Enable;
-            throw new InternalException("Unexpected builtin command file name");
+			// Unexpected builtin command file name
+			if (filename == "_dictation.vcl")
+				return true;
+			throw new InternalException("Unexpected builtin command file name");
         }
 
         public static void SaveToRegistry()
