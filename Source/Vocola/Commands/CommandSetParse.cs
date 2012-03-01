@@ -297,7 +297,7 @@ namespace Vocola
             int variableTermCount;
             Command command = ParseCommand(commandNode, out variableTermCount);
             command.UniqueId = UniqueIdRoot + UniqueId++;
-            command.IsGlobal = (AppName == null);
+			command.IsGlobal = IsGlobal;
             command.IsInternal = (LoadedFile == null);
             Commands.Add(command);
         }

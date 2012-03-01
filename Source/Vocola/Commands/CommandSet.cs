@@ -40,7 +40,7 @@ namespace Vocola
             else
             {
                 UniqueIdRoot = Path.GetFileNameWithoutExtension(LoadedFile.Filename) + "_";
-                UniqueIdRoot = UniqueIdRoot.Replace(".", "_");
+				UniqueIdRoot = UniqueIdRoot.Replace(".", "_").Replace("@", "_").Replace("-", "_");
             }
         }
 
@@ -60,10 +60,9 @@ namespace Vocola
                 Variables.Add(name, new Variable(name));
         }
 
-        public bool IsTopLevel()
-        {
-            return (ParentCommandSet == null);
-        }
+		public bool IsTopLevel { get { return (ParentCommandSet == null); } }
+
+		public bool IsGlobal { get { return (AppName == null); } }
 
         // ---------------------------------------------------------------------
         // Binding
