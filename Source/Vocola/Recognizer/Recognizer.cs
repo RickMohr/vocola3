@@ -83,6 +83,15 @@ namespace Vocola
         {
             foreach (Command command in menu.Alternatives)
             {
+				if (command.Terms.Count > 1)
+				{
+					// There are one or more optional terms, e.g. "The [quick] [brown] fox". Unroll.
+					var unrolledCommands = new List<Command>();
+					UnrollOptionalTerms(new List<string>(), command.Terms, command.Actions, unrolledCommands);
+					MenuTerm newMenu = new MenuTerm(unrolledCommands);
+					FlattenMenu(newMenu, flattenedAlternatives, actionsToDistribute);
+					continue;
+				}
                 object term = command.Terms[0];
                 if (term is WordTerm)
                 {
@@ -129,6 +138,32 @@ namespace Vocola
                 }
             }
         }
+
+		private static void UnrollOptionalTerms(List<string> committedWords, ArrayList remainingTerms,
+			ArrayList actions, List<Command> unrolledCommands)
+		{
+			if (remainingTerms.Count == 0)
+			{
+				// And a command using "committedWords" joined into a single term
+				var terms = new ArrayList();
+				terms.Add(new WordTerm(string.Join(" ", committedWords)));
+				unrolledCommands.Add(new Command(terms, actions));
+			}
+			else
+			{
+				var term = remainingTerms[0] as WordTerm;
+				remainingTerms = remainingTerms.GetRange(1, remainingTerms.Count - 1);
+				if (term.IsOptional)
+				{
+					// Add combinations which omit this term
+					UnrollOptionalTerms(committedWords, remainingTerms, actions, unrolledCommands);
+				}
+				// Add combinations which include this term
+				committedWords = new List<string>(committedWords);
+				committedWords.Add(term.Text);
+				UnrollOptionalTerms(committedWords, remainingTerms, actions, unrolledCommands);
+			}
+		}
 
         private static void ReplaceActions(Command command, ArrayList replacementActions)
         {
