@@ -5,7 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using PerCederberg.Grammatica.Parser; // Node
+using PerCederberg.Grammatica.Parser;
+using System.Text.RegularExpressions; // Node
 
 namespace Vocola
 {
@@ -41,6 +42,7 @@ namespace Vocola
             {
                 UniqueIdRoot = Path.GetFileNameWithoutExtension(LoadedFile.Filename) + "_";
 				UniqueIdRoot = UniqueIdRoot.Replace(".", "_").Replace("@", "_").Replace("-", "_");
+				//Regex.Replace(UniqueIdRoot, "[^a-zA-Z0-9_]", "_");
             }
         }
 

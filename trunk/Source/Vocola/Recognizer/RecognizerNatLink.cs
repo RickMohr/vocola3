@@ -249,7 +249,7 @@ namespace Vocola
                 EmitLine(2, "{0} = <{1}>;", any, ruleNamesString);
             else
                 EmitLine(2, "{0} = <any_{1}>|<{2}>;", any, commandSet.ParentCommandSet.SequenceRuleNumber, ruleNamesString);
-			int nSeq = 0;// (Vocola.CommandSequencesEnabled ? Vocola.MaxSequencedCommands : 0);
+			int nSeq = 2;// (Vocola.CommandSequencesEnabled ? Vocola.MaxSequencedCommands : 0);
             EmitLine(2, "<sequence_{0}> exported = {1};",
                 commandSet.SequenceRuleNumber, GetRepeatGrammar(any, nSeq));
         }
