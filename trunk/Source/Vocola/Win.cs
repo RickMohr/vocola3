@@ -125,6 +125,38 @@ namespace Vocola
             keybd_event(vk, 0, isKeyDownEvent ? 0 : KEYEVENTF_KEYUP, 0);
         }
 
+		static public void SendKeyEvent(byte vk, string keyText, bool isKeyDownEvent)
+		{
+			uint scanCode = MapVirtualKeyEx(vk, 0/*MAPVK_VK_TO_VSC*/, InputLanguage.InstalledInputLanguages[0].Handle);
+			if (isKeyDownEvent)
+				Trace.WriteLine(LogLevel.Low, "    Sending '{0}', virtual key {1}, scan code {2}", keyText, vk, scanCode);
+			keybd_event(vk, (byte)scanCode, isKeyDownEvent ? 0 : KEYEVENTF_KEYUP, 0);
+		}
+
+		static public bool GetVirtualKey(char c, out byte virtualKey, out bool shift, out bool ctrl, out bool alt)
+		{
+			virtualKey = 0;
+			shift = ctrl = alt = false;
+			if (c == 10)
+			{
+				// For some reason VkKeyScanEx returns ctrl+chr(13); we don't want ctrl
+				virtualKey = 13;
+				return true;
+			}
+			short result = VkKeyScanEx(c, InputLanguage.InstalledInputLanguages[0].Handle); // YET: active language?
+			if (result == -1)
+				return false;
+			else
+			{
+				virtualKey = (byte)(result & 0xFF);
+				byte modifierKeys = (byte)(result >> 8);
+				shift = ((modifierKeys & 1) > 0);
+				ctrl = ((modifierKeys & 2) > 0);
+				alt = ((modifierKeys & 4) > 0);
+				return true;
+			}
+		}
+
         static public void SendButtonEvent(byte vk, bool isButtonDownEvent)
         {
             if (isButtonDownEvent)
@@ -201,7 +233,12 @@ namespace Vocola
         [DllImport("user32.dll")] [return: MarshalAs(UnmanagedType.Bool)]   static extern bool   SetForegroundWindow(IntPtr hWnd);
         [DllImport("shell32.dll")]                                          static extern int    SHGetKnownFolderPath( [MarshalAs(UnmanagedType.LPStruct)] Guid rfid, uint dwFlags, IntPtr hToken, out IntPtr pszPath );
 
+		[DllImport("user32.dll")]
+		static extern uint MapVirtualKeyEx(uint uCode, uint uMapType, IntPtr dwhkl);
 
+		[DllImport("user32.dll")]
+		static extern short VkKeyScanEx(char ch, IntPtr dwhkl);
+     
     }
 
 }
