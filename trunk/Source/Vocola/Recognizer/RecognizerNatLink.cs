@@ -358,8 +358,8 @@ namespace Vocola
 
             EmitLine(1, "# {0}", command.TermsToString());
             EmitLine(1, "def {0}(self, words, fullResults):", functionName);
-            //EmitLine(2, "print 'Recognized: {0}'", command.TermsToString()); 
-            EmitOptionalTermFixup(terms);
+			EmitLine(2, "if self.firstWord == 0: self.logSpokenCommand(fullResults)");
+			EmitOptionalTermFixup(terms);
             EmitLine(2, "variableTerms = ''");
 
             int termNumber = 0;
@@ -591,6 +591,11 @@ class ThisGrammar(GrammarBase):
         {
             Emit(0, @"
     # Massage recognition results to make a single entry for each <dgndictation> result.
+
+    def logSpokenCommand(self, fullResults):
+		words = map(lambda t : t[0], fullResults)
+		phrase = ' '.join(words)
+		self.vocolaConnector.LogMessage(1, 'Command: ' + unicode(phrase))
 
     def combineDictationWords(self, fullResults):
         i = 0
