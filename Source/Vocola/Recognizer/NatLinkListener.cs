@@ -44,6 +44,11 @@ namespace Vocola
             }
         }
 
+		public void LogMessage(int level, string message)
+		{
+			Trace.WriteLine((LogLevel)level, message);
+		}
+
     }
 
 }

@@ -11,6 +11,7 @@ namespace Vocola
     public interface INatLinkToVocola
     {
         void RunActions(string commandId, string variableWords);
+		void LogMessage(int level, string message);
     }
 
     public class NatLinkToVocolaClient
@@ -28,7 +29,12 @@ namespace Vocola
         static public void RunActions(string commandId, string variableWords)
         {
             ToVocola.RunActions(commandId, variableWords);
-        }
-        
-    }
+		}
+
+		static public void LogMessage(int level, string message)
+		{
+			ToVocola.LogMessage(level, message);
+		}
+
+	}
 }
