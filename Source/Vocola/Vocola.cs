@@ -59,14 +59,14 @@ namespace Vocola
                 VocolaExtension.VocolaDictation = new VocolaDictation();
                 Extensions.Load();
                 InitializeBaseUsingSet(BaseUsingSetCode, CustomBaseUsingSet);
-                Keystroke.Initialize();
+                Keystrokes.Initialize();
                 BuiltinCommandGroup.Initialize();
                 LoadInternalCommands();
                 TrayIcon = new TrayIcon();
                 TheRecognizer.Initialize();
                 LaunchGrammarUpdateThread();
                 WatchCommandFolder();
-                TheWindowsHooks = new WindowsHooks();
+				TheWindowsHooks = new WindowsHooks();
                 Application.Run();
                 // See TrayIcon.cs for Exit()
             }
@@ -80,7 +80,8 @@ namespace Vocola
 
         static public void Stop()
         {
-            TheWindowsHooks.Stop();
+			if (TheWindowsHooks != null)
+				TheWindowsHooks.Stop();
             AutomationObjectGetter.Cleanup();
             LogWindow.Destroy();
             System.Environment.Exit(0);
@@ -291,10 +292,10 @@ namespace Vocola
                     bool commandsChanged = UpdateCommands(context);
                     if (contextChanged || commandsChanged)
                     {
-                        Trace.InitializeTimer();
-                        Trace.WriteSeparator();
-                        if (contextChanged) Trace.WriteLine(LogLevel.Low, "Context changed ({0})", context);
-                        if (commandsChanged) Trace.WriteLine(LogLevel.Low, "Commands changed");
+                        //Trace.InitializeTimer();
+                        //Trace.WriteSeparator();
+                        //if (contextChanged) Trace.WriteLine(LogLevel.Low, "Context changed ({0})", context);
+                        //if (commandsChanged) Trace.WriteLine(LogLevel.Low, "Commands changed");
                         TheRecognizer.ContextChanged(context);
                         GrammarContext = context;
                     }
