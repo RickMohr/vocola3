@@ -70,3 +70,8 @@ extern "C" void __declspec(dllexport) __stdcall RunActions(const wchar_t* comman
 {
     Vocola::NatLinkToVocolaClient::RunActions(gcnew String(commandId), gcnew String(variableWords));
 }
+
+extern "C" void __declspec(dllexport) __stdcall LogMessage(int level, const wchar_t* message)
+{
+    Vocola::NatLinkToVocolaClient::LogMessage(level, gcnew String(message));
+}
