@@ -295,6 +295,8 @@ namespace Vocola
             EmitLine(2, "self.deactivateAll()");
 			if (commandSet.Commands.Count > 0)
 			{
+				EmitLine(2, "self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1})'))",
+					moduleName, commandSet.Commands.Count);
 				if (commandSet.IsGlobal)
 					EmitLine(2, "self.activate('sequence_0')");
 				else
