@@ -14,7 +14,7 @@ namespace Vocola
     {
         private string GrammarsFolder = @"C:\Programs\NatLink\NatLink\MacroSystem";
         private string NatLinkConnectorDllPath = Path.Combine(Application.StartupPath, "NatLinkConnectorC.dll");
-		private IVocolaToNatLink NatLinkCallbacks;
+		private NatLinkCallbacks NatLinkCallbacks;
 
         public override void Initialize()
         {
@@ -45,7 +45,7 @@ namespace Vocola
         // ---------------------------------------------------------------------
         // Entry points
 
-		public void SetVocolaToNatlinkCallbackObject(IVocolaToNatLink natLinkCallbacks)
+		public void SetVocolaToNatLinkCallbackObject(NatLinkCallbacks natLinkCallbacks)
 		{
 			NatLinkCallbacks = natLinkCallbacks;
 		}
@@ -66,16 +66,16 @@ namespace Vocola
                 Trace.LogUnexpectedException(e);
             }
         }
-    
-        public override void DisplayMessage(string message, bool isWarning)
-        {
-            Trace.WriteLine(isWarning ? LogLevel.Error : LogLevel.High, message);
-        }
 
 		public override void EmulateRecognize(string words)
 		{
 			NatLinkCallbacks.EmulateRecognize(words);
 		}
+    
+        public override void DisplayMessage(string message, bool isWarning)
+        {
+            Trace.WriteLine(isWarning ? LogLevel.Error : LogLevel.High, message);
+        }
 
         // ---------------------------------------------------------------------
         // Convert one Vocola command file to a NatLink grammar file

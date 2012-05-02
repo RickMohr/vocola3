@@ -26,9 +26,9 @@ namespace Vocola
     public class NatLinkToVocolaServer : MarshalByRefObject, INatLinkToVocola
     {
 
-		public void SetVocolaToNatlinkCallbackObject(IVocolaToNatLink natLinkCallbacks)
+		public void SetVocolaToNatlinkCallbackObject(NatLinkCallbacks natLinkCallbacks)
 		{
-			((RecognizerNatLink)Vocola.TheRecognizer).SetVocolaToNatlinkCallbackObject(natLinkCallbacks);
+			((RecognizerNatLink)Vocola.TheRecognizer).SetVocolaToNatLinkCallbackObject(natLinkCallbacks);
 		}
 
         public void RunActions(string commandId, string variableWords)

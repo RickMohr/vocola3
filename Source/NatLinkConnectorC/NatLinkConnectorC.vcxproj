@@ -97,14 +97,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NatLinkConnectorCSharp\NatLinkConnectorCSharp.csproj">
-      <Project>{b8de1ac1-4521-4e03-96a3-678a01f9d9a7}</Project>
-      <Private>false</Private>
-      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="NatLinkConnectorC.cpp" />
     <ClCompile Include="Stdafx.cpp">
@@ -123,6 +115,11 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NatLinkConnectorCSharp\NatLinkToVocolaClient.csproj">
+      <Project>{b8de1ac1-4521-4e03-96a3-678a01f9d9a7}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
