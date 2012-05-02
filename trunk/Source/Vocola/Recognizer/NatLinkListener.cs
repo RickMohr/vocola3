@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Serialization.Formatters;
 
 namespace Vocola
 {
@@ -11,18 +12,24 @@ namespace Vocola
     public class NatLinkListener
     {
 
-        static public void Start(int port)
+        static public void Start()
         {
-            TcpChannel channel = new TcpChannel(port);
-            ChannelServices.RegisterChannel(channel, true);
+			var prov = new BinaryServerFormatterSinkProvider() { TypeFilterLevel = TypeFilterLevel.Full };
+			var channel = new IpcServerChannel("NatLinkToVocolaServerChannel", "NatLinkToVocolaServerChannel", prov);
+            ChannelServices.RegisterChannel(channel, false);
             RemotingConfiguration.RegisterWellKnownServiceType(
-                typeof(NatLinkToVocolaServer), "NatLinkToVocola", WellKnownObjectMode.Singleton);
+                typeof(NatLinkToVocolaServer), "NatLinkToVocolaListener", WellKnownObjectMode.Singleton);
         }
 
     }
 
     public class NatLinkToVocolaServer : MarshalByRefObject, INatLinkToVocola
     {
+
+		public void SetVocolaToNatlinkCallbackObject(IVocolaToNatLink natLinkCallbacks)
+		{
+			((RecognizerNatLink)Vocola.TheRecognizer).SetVocolaToNatlinkCallbackObject(natLinkCallbacks);
+		}
 
         public void RunActions(string commandId, string variableWords)
         {
