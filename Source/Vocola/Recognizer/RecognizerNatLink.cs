@@ -13,14 +13,14 @@ namespace Vocola
     public class RecognizerNatLink : Recognizer
     {
         private string GrammarsFolder = @"C:\Programs\NatLink\NatLink\MacroSystem";
-        private int NatLinkToVocolaPort = 9753;
         private string NatLinkConnectorDllPath = Path.Combine(Application.StartupPath, "NatLinkConnectorC.dll");
+		private IVocolaToNatLink NatLinkCallbacks;
 
         public override void Initialize()
         {
             ReadRegistry();
             CleanGrammarsFolder();
-            NatLinkListener.Start(NatLinkToVocolaPort);
+            NatLinkListener.Start();
         }
 
         private void ReadRegistry()
@@ -45,6 +45,11 @@ namespace Vocola
         // ---------------------------------------------------------------------
         // Entry points
 
+		public void SetVocolaToNatlinkCallbackObject(IVocolaToNatLink natLinkCallbacks)
+		{
+			NatLinkCallbacks = natLinkCallbacks;
+		}
+
         public override void CommandFileChanged(LoadedFile loadedFile)
         {
             try
@@ -66,6 +71,11 @@ namespace Vocola
         {
             Trace.WriteLine(isWarning ? LogLevel.Error : LogLevel.High, message);
         }
+
+		public override void EmulateRecognize(string words)
+		{
+			NatLinkCallbacks.EmulateRecognize(words);
+		}
 
         // ---------------------------------------------------------------------
         // Convert one Vocola command file to a NatLink grammar file
@@ -581,8 +591,7 @@ class ThisGrammar(GrammarBase):
             EmitLine(1, "def initialize(self):");
             EmitLine(2, "print 'Loading Vocola commands for {0}'", moduleName);
             EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
-            EmitLine(2, "self.vocolaConnector.InitializeConnection({0}, unicode(r'{1}'))", NatLinkToVocolaPort, Path.GetDirectoryName(NatLinkConnectorDllPath));
-            //EmitLine(2, "self.vocolaConnector.InitializeConnection()");
+            EmitLine(2, "self.vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
             Emit(0, @"
         self.load(self.gramSpec)
         self.currentModule = ("","",0)
