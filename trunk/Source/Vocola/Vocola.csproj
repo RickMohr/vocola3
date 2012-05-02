@@ -131,7 +131,7 @@
     </Compile>
     <Compile Include="Actions\EvalAction.cs" />
     <Compile Include="Extensions\Extensions.cs" />
-    <Compile Include="Recognizer\NatLinkListener.cs" />
+    <Compile Include="Recognizer\NatLinkToVocolaServer.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="UI\LogWindow.cs">
       <SubType>Form</SubType>
@@ -228,9 +228,9 @@
       <Project>{C6F8F80C-72D3-47BF-B540-CF084ED58BDD}</Project>
       <Name>AutomationObjectGetterServer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NatLinkConnectorCSharp\NatLinkConnectorCSharp.csproj">
+    <ProjectReference Include="..\NatLinkConnectorCSharp\NatLinkToVocolaClient.csproj">
       <Project>{B8DE1AC1-4521-4E03-96A3-678A01F9D9A7}</Project>
-      <Name>NatLinkConnectorCSharp</Name>
+      <Name>NatLinkToVocolaClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\SapiHelper\SapiHelper.vcxproj">
       <Project>{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}</Project>

@@ -8,8 +8,8 @@
     <ProjectGuid>{B8DE1AC1-4521-4E03-96A3-678A01F9D9A7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NatLinkConnectorCSharp</RootNamespace>
-    <AssemblyName>NatLinkConnectorCSharp</AssemblyName>
+    <RootNamespace>NatLinkToVocolaClient</RootNamespace>
+    <AssemblyName>NatLinkToVocolaClient</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -57,7 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NatLinkConnector.cs" />
+    <Compile Include="NatLinkToVocolaClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

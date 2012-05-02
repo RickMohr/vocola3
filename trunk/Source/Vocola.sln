@@ -31,7 +31,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grammatica-1.4-Runtime", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomationObjectGetterServer", "AutomationObjectGetter\AutomationObjectGetterServer.csproj", "{C6F8F80C-72D3-47BF-B540-CF084ED58BDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NatLinkConnectorCSharp", "NatLinkConnectorCSharp\NatLinkConnectorCSharp.csproj", "{B8DE1AC1-4521-4E03-96A3-678A01F9D9A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NatLinkToVocolaClient", "NatLinkConnectorCSharp\NatLinkToVocolaClient.csproj", "{B8DE1AC1-4521-4E03-96A3-678A01F9D9A7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NatLinkConnectorC", "NatLinkConnectorC\NatLinkConnectorC.vcxproj", "{DB86494F-9DF0-4213-96F2-5B98E089CA41}"
 EndProject
