@@ -577,6 +577,13 @@ namespace Vocola
 import natlink
 from natlinkutils import *
 import ctypes
+from ctypes import CFUNCTYPE, c_wchar
+
+def emulateRecognize():
+    print 'starting execScript'
+    natlink.execScript('GoToSleep') # error: 'calling execScript is not allowed from gotBegin'
+    print 'finished execScript'
+    #natlink.execScript('HeardWord switch, to, Outlook')
 
 class ThisGrammar(GrammarBase):
 
@@ -593,6 +600,9 @@ class ThisGrammar(GrammarBase):
             EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
             EmitLine(2, "self.vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
             Emit(0, @"
+        MYFUNCTYPE = CFUNCTYPE(None)
+        self.myFunc = MYFUNCTYPE(emulateRecognize)
+        self.vocolaConnector.SetCallbacks(self.myFunc)
         self.load(self.gramSpec)
         self.currentModule = ("","",0)
 ");
@@ -607,6 +617,7 @@ class ThisGrammar(GrammarBase):
 		words = map(lambda t : t[0], fullResults)
 		phrase = ' '.join(words)
 		self.vocolaConnector.LogMessage(1, 'Command: ' + unicode(phrase))
+		if words == 1: print self.myFunc # hack to keep myFunc from being deallocated
 
     def combineDictationWords(self, fullResults):
         i = 0

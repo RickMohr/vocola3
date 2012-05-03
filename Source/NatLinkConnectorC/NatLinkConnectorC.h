@@ -11,7 +11,10 @@ using namespace System::Windows::Forms;
 // C# can't export functions, so this thin C++ file does the job.
 // These functions call C# methods (easier to read) to do the work.
 
+static bool Initialized = false;
 static wchar_t VocolaExecutionFolder[1000];
+//static void (*fpEmulateRecognize)(const wchar_t* words);
+static void (*fpEmulateRecognize)();
 
 Assembly^ CurrentDomain_AssemblyResolve(Object^ sender, ResolveEventArgs^ args)
 {
@@ -43,35 +46,54 @@ void ReallyInitializeConnection()
     Vocola::NatLinkToVocolaClient::InitializeConnection();
 }
 
-static bool initialized = false;
 
-extern "C" void __declspec(dllexport) __stdcall InitializeConnection(const wchar_t* vocolaExecutionFolder)
+extern "C" 
 {
-    try
-    {
-        if (initialized)
-            return;
-        wcscpy_s(VocolaExecutionFolder, vocolaExecutionFolder);
 
-        // The executing AppDomain's "CodeBase" is the Python executable folder, so we have to specify how to find assemblies
-        AppDomain::CurrentDomain->AssemblyResolve += gcnew ResolveEventHandler(CurrentDomain_AssemblyResolve);
+	// Initialization
 
-        // If InitializeConnection() isn't called in a separate function the assembly load fails before the resolver is established
-        ReallyInitializeConnection();
-        initialized = true;
-    }
-    catch (Exception^ ex)
-    {
-        MessageBox::Show(ex->Message);
-    }
-}
+	void __declspec(dllexport) __stdcall InitializeConnection(const wchar_t* vocolaExecutionFolder)
+	{
+		try
+		{
+			if (Initialized)
+				return;
+			wcscpy_s(VocolaExecutionFolder, vocolaExecutionFolder);
 
-extern "C" void __declspec(dllexport) __stdcall RunActions(const wchar_t* commandId, const wchar_t* variableWords)
-{
-    Vocola::NatLinkToVocolaClient::RunActions(gcnew String(commandId), gcnew String(variableWords));
-}
+			// The executing AppDomain's "CodeBase" is the Python executable folder, so we have to specify how to find assemblies
+			AppDomain::CurrentDomain->AssemblyResolve += gcnew ResolveEventHandler(CurrentDomain_AssemblyResolve);
 
-extern "C" void __declspec(dllexport) __stdcall LogMessage(int level, const wchar_t* message)
-{
-    Vocola::NatLinkToVocolaClient::LogMessage(level, gcnew String(message));
+			// If InitializeConnection() isn't called in a separate function the assembly load fails before the resolver is established
+			ReallyInitializeConnection();
+			Initialized = true;
+		}
+		catch (Exception^ ex)
+		{
+			MessageBox::Show(ex->Message);
+		}
+	}
+
+	void __declspec(dllexport) __stdcall SetCallbacks(void (*fpNatLinkEmulateRecognize)())
+	{
+		fpEmulateRecognize = fpNatLinkEmulateRecognize;
+	}
+
+	// NatLink to Vocola
+
+	void __declspec(dllexport) __stdcall RunActions(const wchar_t* commandId, const wchar_t* variableWords)
+	{
+		Vocola::NatLinkToVocolaClient::RunActions(gcnew String(commandId), gcnew String(variableWords));
+	}
+
+	void __declspec(dllexport) __stdcall LogMessage(int level, const wchar_t* message)
+	{
+		Vocola::NatLinkToVocolaClient::LogMessage(level, gcnew String(message));
+	}
+
+	// Vocola to NatLink
+
+	void __declspec(dllexport) NatLinkEmulateRecognize(const wchar_t* words)
+	{
+		fpEmulateRecognize();
+	}
 }
