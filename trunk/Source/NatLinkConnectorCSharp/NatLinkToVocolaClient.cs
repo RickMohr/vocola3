@@ -4,6 +4,7 @@ using System.Runtime.Remoting.Channels.Ipc;
 using System.Diagnostics;
 using System.Runtime.Serialization.Formatters;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Vocola
 {
@@ -46,11 +47,15 @@ namespace Vocola
 
 		public void EmulateRecognize(string words)
 		{
-			//using (var sw = new StreamWriter(@"C:\Temp\rick.txt"))
-			//{
-			//    sw.WriteLine("HearCommand: " + words);
-			//}
+			using (var sw = new StreamWriter(@"C:\Temp\rick.txt"))
+			{
+				sw.WriteLine("HearCommand: " + words);
+			}
+			NatLinkEmulateRecognize(words);
 		}
+
+		[DllImport("NatLinkConnectorC.dll", CharSet=CharSet.Unicode)]
+		private static extern void NatLinkEmulateRecognize(string words);
 
 	}
 
