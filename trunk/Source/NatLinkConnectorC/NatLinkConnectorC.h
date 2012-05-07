@@ -13,8 +13,8 @@ using namespace System::Windows::Forms;
 
 static bool Initialized = false;
 static wchar_t VocolaExecutionFolder[1000];
-//static void (*fpEmulateRecognize)(const wchar_t* words);
-static void (*fpEmulateRecognize)();
+static void (*fpEmulateRecognize)(const wchar_t* words);
+//static void (*fpEmulateRecognize)();
 
 Assembly^ CurrentDomain_AssemblyResolve(Object^ sender, ResolveEventArgs^ args)
 {
@@ -73,7 +73,7 @@ extern "C"
 		}
 	}
 
-	void __declspec(dllexport) __stdcall SetCallbacks(void (*fpNatLinkEmulateRecognize)())
+	void __declspec(dllexport) __stdcall SetCallbacks(void (*fpNatLinkEmulateRecognize)(const wchar_t* words))
 	{
 		fpEmulateRecognize = fpNatLinkEmulateRecognize;
 	}
@@ -94,6 +94,6 @@ extern "C"
 
 	void __declspec(dllexport) NatLinkEmulateRecognize(const wchar_t* words)
 	{
-		fpEmulateRecognize();
+		fpEmulateRecognize(words);
 	}
 }
