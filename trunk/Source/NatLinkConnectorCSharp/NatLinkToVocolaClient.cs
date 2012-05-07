@@ -14,6 +14,10 @@ namespace Vocola
 		void LogMessage(int level, string message);
 	}
 
+	// NatLink to Vocola calls. 
+	// Each arrive via Python to C to C# hops, and execute in the NatSpeak process.
+	// Each make inter-process calls (IPC) to the Vocola process.
+
 	public class NatLinkToVocolaClient
 	{
 		static private INatLinkToVocola ToVocola;
@@ -42,11 +46,20 @@ namespace Vocola
 
 	}
 
+	// Handling Vocola to NatLink callbacks (notably EmulateRecognize()) is tricky. 
+	// NatSpeak has only one thread, and we must use it to execute callbacks. 
+	// But Vocola initiates the callbacks via IPC, so they arrive on a different thread. 
+	// Here we set up synchronization so a callback can make a thunk and signal the main thread
+	// to execute it (synchronously).
+
 	public class NatLinkCallbackHandler : MarshalByRefObject
 	{
 		private EventWaitHandle CallbackRequestWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
 		private EventWaitHandle CallbackDoneWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
 		private Action CallbackThunk;
+
+		// Executed on NatSpeak thread. Wait for a callback request, execute it, 
+		// and signal the requestor when done.
 
 		public void HandleCallbacks()
 		{
@@ -54,18 +67,17 @@ namespace Vocola
 			{
 				CallbackRequestWaitHandle.WaitOne();
 				if (CallbackThunk == null)
-					return;
+					return; // actions done
 				CallbackThunk.Invoke();
 				CallbackDoneWaitHandle.Set();
 			}
 		}
 
+		// A callback arrives on a separate thread. Create a thunk, signal main thread to handle it,
+		// and wait for completion.
+
 		public void EmulateRecognize(string words)
 		{
-			//using (var sw = new StreamWriter(@"C:\Temp\rick.txt"))
-			//{
-			//    sw.WriteLine("HearCommand: " + words);
-			//}
 			CallbackThunk = () => NatLinkEmulateRecognize(words);
 			CallbackRequestWaitHandle.Set();
 			CallbackDoneWaitHandle.WaitOne();
@@ -76,6 +88,8 @@ namespace Vocola
 			CallbackThunk = null;
 			CallbackRequestWaitHandle.Set();
 		}
+
+		// The callbacks reach NatLink via these C calls, which then call Python
 
 		[DllImport("NatLinkConnectorC.dll", CharSet=CharSet.Unicode)]
 		private static extern void NatLinkEmulateRecognize(string words);
