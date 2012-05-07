@@ -14,7 +14,6 @@ namespace Vocola
     {
         private string GrammarsFolder = @"C:\Programs\NatLink\NatLink\MacroSystem";
         private string NatLinkConnectorDllPath = Path.Combine(Application.StartupPath, "NatLinkConnectorC.dll");
-		private NatLinkCallbacks NatLinkCallbacks;
 
         public override void Initialize()
         {
@@ -45,11 +44,6 @@ namespace Vocola
         // ---------------------------------------------------------------------
         // Entry points
 
-		public void SetVocolaToNatLinkCallbackObject(NatLinkCallbacks natLinkCallbacks)
-		{
-			NatLinkCallbacks = natLinkCallbacks;
-		}
-
         public override void CommandFileChanged(LoadedFile loadedFile)
         {
             try
@@ -69,7 +63,7 @@ namespace Vocola
 
 		public override void EmulateRecognize(string words)
 		{
-			NatLinkCallbacks.EmulateRecognize(words);
+			NatLinkToVocolaServer.CurrentNatLinkCallbackHandler.EmulateRecognize(words);
 		}
     
         public override void DisplayMessage(string message, bool isWarning)
@@ -388,8 +382,10 @@ namespace Vocola
                     EmitLine(2, "variableTerms += fullResults[{0} + self.firstWord][0] + '\\n'", termNumber);
                 termNumber++;
             }
-            EmitLine(2, "self.vocolaConnector.RunActions(unicode('{0}'), unicode(variableTerms))", command.UniqueId);
-            EmitLine(2, "self.firstWord += {0}", nTerms);
+			EmitLine(2, "print 'calling RunActions()'");
+			EmitLine(2, "self.vocolaConnector.RunActions(unicode('{0}'), unicode(variableTerms))", command.UniqueId);
+			EmitLine(2, "print 'returned from RunActions()'");
+			EmitLine(2, "self.firstWord += {0}", nTerms);
 
             // If repeating a command with no <variable> terms (e.g. "Scratch That
             // Scratch That"), our gotResults function will be called only once, with
@@ -579,11 +575,12 @@ from natlinkutils import *
 import ctypes
 from ctypes import CFUNCTYPE, c_wchar
 
-def emulateRecognize():
-    print 'starting execScript'
-    natlink.execScript('GoToSleep') # error: 'calling execScript is not allowed from gotBegin'
-    print 'finished execScript'
-    #natlink.execScript('HeardWord switch, to, Outlook')
+def emulateRecognize(words):
+    print 'starting recognitionMimic'
+    print 'words = ' + words.encode('ascii','replace')
+    natlink.recognitionMimic([words.encode('ascii','replace')])
+    #natlink.recognitionMimic(['switch', 'to', 'Outlook'])
+    print 'finished recognitionMimic'
 
 class ThisGrammar(GrammarBase):
 
@@ -600,7 +597,7 @@ class ThisGrammar(GrammarBase):
             EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
             EmitLine(2, "self.vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
             Emit(0, @"
-        MYFUNCTYPE = CFUNCTYPE(None)
+        MYFUNCTYPE = CFUNCTYPE(None, c_wchar)
         self.myFunc = MYFUNCTYPE(emulateRecognize)
         self.vocolaConnector.SetCallbacks(self.myFunc)
         self.load(self.gramSpec)
