@@ -25,30 +25,37 @@ namespace Vocola
 
     public class NatLinkToVocolaServer : MarshalByRefObject, INatLinkToVocola
     {
+		private static Stack<NatLinkCallbackHandler> CallbackHandlers = new Stack<NatLinkCallbackHandler>();
 
-		public void SetVocolaToNatlinkCallbackObject(NatLinkCallbacks natLinkCallbacks)
+		public static NatLinkCallbackHandler CurrentNatLinkCallbackHandler
 		{
-			((RecognizerNatLink)Vocola.TheRecognizer).SetVocolaToNatLinkCallbackObject(natLinkCallbacks);
+			get { return CallbackHandlers.Peek(); }
 		}
 
-        public void RunActions(string commandId, string variableWords)
+		public void RunActions(string commandId, string variableWords, NatLinkCallbackHandler callbackHandler)
         {
-            try
-            {
-                Command command = CommandSet.GetCommand(commandId);
-                if (command == null)
-                    throw new InternalException("Could not find command '{0}'", commandId);
-                Trace.WriteLine(LogLevel.Medium, "  Executing {0}:  {1}", commandId, command);
+			CallbackHandlers.Push(callbackHandler);
+			try
+			{
+				Command command = CommandSet.GetCommand(commandId);
+				if (command == null)
+					throw new InternalException("Could not find command '{0}'", commandId);
+				Trace.WriteLine(LogLevel.Medium, "  Executing {0}:  {1}", commandId, command);
 
-                ActionsQueue actionsQueue = new ActionsQueue();
-                List<ArrayList> variableTermActions = RecognizerNatLink.GetVariableTermActions(command, variableWords);
-                actionsQueue.AddActions(command.Actions, variableTermActions);
-                ActionRunner.Launch(actionsQueue);
-            }
-            catch (Exception ex)
-            {
-                Trace.LogExecutionException(ex);
-            }
+				ActionsQueue actionsQueue = new ActionsQueue();
+				List<ArrayList> variableTermActions = RecognizerNatLink.GetVariableTermActions(command, variableWords);
+				actionsQueue.AddActions(command.Actions, variableTermActions);
+				ActionRunner.RunActions(actionsQueue);
+			}
+			catch (Exception ex)
+			{
+				Trace.LogExecutionException(ex);
+			}
+			finally
+			{
+				CallbackHandlers.Pop();
+				callbackHandler.ActionsDone();
+			}
         }
 
 		public void LogMessage(int level, string message)
