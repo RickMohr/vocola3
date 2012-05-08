@@ -56,7 +56,9 @@ namespace Vocola
 	{
 		private EventWaitHandle CallbackRequestWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
 		private EventWaitHandle CallbackDoneWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
-		private Action CallbackThunk;
+		private delegate int CallbackDelegate();
+		CallbackDelegate CallbackThunk;
+		private bool CallbackSucceeded;
 
 		// Executed on NatSpeak thread. Wait for a callback request, execute it, 
 		// and signal the requestor when done.
@@ -68,7 +70,8 @@ namespace Vocola
 				CallbackRequestWaitHandle.WaitOne();
 				if (CallbackThunk == null)
 					return; // actions done
-				CallbackThunk.Invoke();
+				int result = CallbackThunk();
+				CallbackSucceeded = (result == 0);
 				CallbackDoneWaitHandle.Set();
 			}
 		}
@@ -76,11 +79,12 @@ namespace Vocola
 		// A callback arrives on a separate thread. Create a thunk, signal main thread to handle it,
 		// and wait for completion.
 
-		public void EmulateRecognize(string words)
+		public bool EmulateRecognize(string words)
 		{
 			CallbackThunk = () => NatLinkEmulateRecognize(words);
 			CallbackRequestWaitHandle.Set();
 			CallbackDoneWaitHandle.WaitOne();
+			return CallbackSucceeded;
 		}
 
 		public void ActionsDone()
@@ -92,7 +96,7 @@ namespace Vocola
 		// The callbacks reach NatLink via these C calls, which then call Python
 
 		[DllImport("NatLinkConnectorC.dll", CharSet=CharSet.Unicode)]
-		private static extern void NatLinkEmulateRecognize(string words);
+		private static extern int NatLinkEmulateRecognize(string words);
 
 	}
 

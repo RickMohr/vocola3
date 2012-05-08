@@ -63,7 +63,9 @@ namespace Vocola
 
 		public override void EmulateRecognize(string words)
 		{
-			NatLinkToVocolaServer.CurrentNatLinkCallbackHandler.EmulateRecognize(words);
+			bool success = NatLinkToVocolaServer.CurrentNatLinkCallbackHandler.EmulateRecognize(words);
+			if (!success)
+				throw new ActionException(null, "HearCommand() failed to recognize '{0}'", words);
 		}
     
         public override void DisplayMessage(string message, bool isWarning)
@@ -573,14 +575,12 @@ namespace Vocola
 import natlink
 from natlinkutils import *
 import ctypes
-from ctypes import CFUNCTYPE, c_wchar
+from ctypes import CFUNCTYPE, c_wchar_p, c_int
 
 def emulateRecognize(words):
-    print 'starting recognitionMimic'
-    print 'words = ' + words.encode('ascii','replace')
-    natlink.recognitionMimic([words.encode('ascii','replace')])
-    #natlink.recognitionMimic(['switch', 'to', 'Outlook'])
-    print 'finished recognitionMimic'
+    try: natlink.recognitionMimic(words.encode('ascii','replace').split(' '))
+    except: return -1
+    return 0
 
 class ThisGrammar(GrammarBase):
 
@@ -597,7 +597,7 @@ class ThisGrammar(GrammarBase):
             EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
             EmitLine(2, "self.vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
             Emit(0, @"
-        MYFUNCTYPE = CFUNCTYPE(None, c_wchar)
+        MYFUNCTYPE = CFUNCTYPE(c_int, c_wchar_p)
         self.myFunc = MYFUNCTYPE(emulateRecognize)
         self.vocolaConnector.SetCallbacks(self.myFunc)
         self.load(self.gramSpec)
