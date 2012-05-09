@@ -1,11 +1,11 @@
-%header%
+ %header%
     DESCRIPTION = "Grammatica grammar for Vocola."
     AUTHOR      = "Rick Mohr, <Rick at RickMohr dot net>"
     VERSION     = "3.0"
     DATE        = "28 July 2008"
     LICENSE     = "Permission is granted to copy this document verbatim in any
                    medium, provided that this copyright notice is left intact."
-    COPYRIGHT   = "Copyright (c) 2008 Rick Mohr. All rights reserved."
+    COPYRIGHT   = "Copyright (c) 2008-2012 Rick Mohr. All rights reserved."
     GRAMMARTYPE = "LL"
 
 %tokens%
@@ -16,6 +16,7 @@
     DOTTEDNAMEPAREN = <<([a-zA-Z_]\w*\.)*[a-zA-Z_]\w*\(>>
     REFERENCE       = <<\$([a-zA-Z_]\w*|\d+)>>
     RANGE           = <<\d+\.\.\d+>>
+	NUMBER          = <<\d+>>
     CHARS           = <<[^"'#=;|\[\]()<>, \t\n\r]+>>
     QUOTED_CHARS    = <<"([^"\n\r]|"")*"|'([^'\n\r]|'')*'>>
     COMMENT_MULTI   = <<#\|(.|[\n\r])*?\|#>> %ignore%
@@ -30,6 +31,8 @@
     ELSEIF_T  = '$elseif'
     ELSE_T    = '$else'
     ENDIF_T   = '$end'
+    SET_T     = '$set'
+    MAXCMD_T  = 'MaximumCommands'
     OR        = '|'
     BRACKET_L = '['
     BRACKET_R = ']'
@@ -40,7 +43,8 @@
     COMMA     = ','
 
 %productions%
-          file = using* statements ;
+          file = [setmaxseq] using* statements ;
+     setmaxseq = '$set' 'MaximumCommands' NUMBER ';' ;
          using = '$using' words ';' ;
     statements = (include | context | definition | function | command)+ ;
 
@@ -62,7 +66,7 @@
    alternative = terms ['=' [actions] ] ;
 
          words = word+ ;
-          word = (QUOTED_CHARS | NAME | CHARS) ;
+          word = (QUOTED_CHARS | NAME | NUMBER | CHARS) ;
 
        actions = action+ ;
         action = words | REFERENCE | call ;

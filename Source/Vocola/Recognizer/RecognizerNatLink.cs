@@ -255,7 +255,7 @@ namespace Vocola
                 EmitLine(2, "{0} = <{1}>;", any, ruleNamesString);
             else
                 EmitLine(2, "{0} = <any_{1}>|<{2}>;", any, commandSet.ParentCommandSet.SequenceRuleNumber, ruleNamesString);
-			int nSeq = 2;// (Vocola.CommandSequencesEnabled ? Vocola.MaxSequencedCommands : 0);
+			int nSeq = (Vocola.CommandSequencesEnabled ? commandSet.MaxSequencedCommands : 0);
             EmitLine(2, "<sequence_{0}> exported = {1};",
                 commandSet.SequenceRuleNumber, GetRepeatGrammar(any, nSeq));
         }
@@ -384,9 +384,9 @@ namespace Vocola
                     EmitLine(2, "variableTerms += fullResults[{0} + self.firstWord][0] + '\\n'", termNumber);
                 termNumber++;
             }
-			EmitLine(2, "print 'calling RunActions()'");
+			//EmitLine(2, "print 'calling RunActions()'");
 			EmitLine(2, "self.vocolaConnector.RunActions(unicode('{0}'), unicode(variableTerms))", command.UniqueId);
-			EmitLine(2, "print 'returned from RunActions()'");
+			//EmitLine(2, "print 'returned from RunActions()'");
 			EmitLine(2, "self.firstWord += {0}", nTerms);
 
             // If repeating a command with no <variable> terms (e.g. "Scratch That

@@ -15,26 +15,28 @@ namespace Vocola
     {
         public  Dictionary<string, Variable> Variables; // maps variable name to Variable instance
         private Dictionary<string, Function> Functions; // maps function name to Function instance (formals, actions)
-        public  List<Command> Commands; 
+        public  List<Command> Commands { get; private set; }
         public  List<List<CommandSet>> ConditionalCommandSets; // created by $if...$elseif...$else...$end
-        public  ArrayList WindowTitlePatterns;
-        public  string AppName;
-        public  CommandSet ParentCommandSet; // if I was created by $if
+        public  ArrayList WindowTitlePatterns { get; private set; }
+        private  string AppName;
+        public  CommandSet ParentCommandSet { get; private set; } // if I was created by $if
         private LoadedFile LoadedFile;
-        private string UniqueIdRoot;
-        public  bool HasLanguageException;
-        public  int SequenceRuleNumber; // used by RecognizerNatLink
+		private string UniqueIdRoot;
+        public  bool HasLanguageException { get; private set; }
+		public int MaxSequencedCommands { get; private set; }
+		public  int SequenceRuleNumber; // used by RecognizerNatLink
 
-        public CommandSet(LoadedFile loadedFile)
+        public CommandSet(LoadedFile loadedFile, string appName)
         {
             Variables = new Dictionary<string, Variable>(); 
             Functions = new Dictionary<string, Function>(); 
             Commands = new List<Command>(); 
             ConditionalCommandSets = new List<List<CommandSet>>();
             WindowTitlePatterns = new ArrayList();
-            AppName = null;
+			AppName = appName;
             ParentCommandSet = null;
             HasLanguageException = false;
+			MaxSequencedCommands = 1;// Vocola.MaxSequencedCommands;
             LoadedFile = loadedFile;
             if (loadedFile == null)
                 UniqueIdRoot = "__internal_";

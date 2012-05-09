@@ -6,7 +6,7 @@
  * Permission is granted to copy this document verbatim in any
  * medium, provided that this copyright notice is left intact.
  * 
- * Copyright (c) 2008 Rick Mohr. All rights reserved.
+ * Copyright (c) 2008-2012 Rick Mohr. All rights reserved.
  */
 
 using System.IO;
@@ -88,6 +88,12 @@ namespace Vocola {
                                        "\\d+\\.\\.\\d+");
             AddPattern(pattern);
 
+            pattern = new TokenPattern((int) VocolaConstants.NUMBER,
+                                       "NUMBER",
+                                       TokenPattern.PatternType.REGEXP,
+                                       "\\d+");
+            AddPattern(pattern);
+
             pattern = new TokenPattern((int) VocolaConstants.CHARS,
                                        "CHARS",
                                        TokenPattern.PatternType.REGEXP,
@@ -166,6 +172,18 @@ namespace Vocola {
                                        "ENDIF_T",
                                        TokenPattern.PatternType.STRING,
                                        "$end");
+            AddPattern(pattern);
+
+            pattern = new TokenPattern((int) VocolaConstants.SET_T,
+                                       "SET_T",
+                                       TokenPattern.PatternType.STRING,
+                                       "$set");
+            AddPattern(pattern);
+
+            pattern = new TokenPattern((int) VocolaConstants.MAXCMD_T,
+                                       "MAXCMD_T",
+                                       TokenPattern.PatternType.STRING,
+                                       "MaximumCommands");
             AddPattern(pattern);
 
             pattern = new TokenPattern((int) VocolaConstants.OR,

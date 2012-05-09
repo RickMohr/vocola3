@@ -80,8 +80,11 @@ namespace Vocola
                 Node node = fileNode.GetChildAt(i);
                 switch (node.GetName())
                 {
-                case "using":
-                    try
+                case "setmaxseq":
+					MaxSequencedCommands = Int32.Parse(GetText(node.GetChildAt(2)));
+					break;
+				case "using":
+					try
                     {
                         string usingName = ParseAndSimplifyLocalActions(node.GetChildAt(1));
                         if (Extensions.ClassOrNamespaceExists(usingName))
@@ -226,9 +229,8 @@ namespace Vocola
             List<CommandSet> conditionalCommandSet = new List<CommandSet>();
             for (int i = 0; i < contextNode.GetChildCount() - 1; i += 2)
             {
-                CommandSet cs = new CommandSet(LoadedFile);
+                CommandSet cs = new CommandSet(LoadedFile, AppName);
                 cs.ParentCommandSet = this;
-                cs.AppName = AppName;
                 switch (contextNode.GetChildAt(i).GetName())
                 {
                     case "IF_T":
@@ -328,9 +330,10 @@ namespace Vocola
             string text = GetText(termNode);
             switch (termNode.GetName())
             {
-            case "NAME":
-            case "CHARS":
-                return new WordTerm(text);
+			case "NAME":
+			case "CHARS":
+			case "NUMBER":
+				return new WordTerm(text);
             case "QUOTED_CHARS":
                 text = text.Substring(1, text.Length - 2);  // strip quotes
                 return new WordTerm(text);
@@ -473,7 +476,8 @@ namespace Vocola
             {
             case "NAME":
             case "CHARS":
-                return new KeysAction(text);
+			case "NUMBER":
+				return new KeysAction(text);
             case "QUOTED_CHARS":
                 bool delimitedBySingleQuotes = text.StartsWith("'");
                 text = text.Substring(1, text.Length - 2);  // strip quotes

@@ -205,7 +205,7 @@ namespace Vocola
             string commandFileText = "<_itemInWindow> = Library.Main.HearCommand('Insert $1');";
             VocolaParser parser = new VocolaParser(new StringReader(commandFileText));
             Node parseTree = parser.Parse();
-            SpokenControlNameCommandSet = new CommandSet(null);
+            SpokenControlNameCommandSet = new CommandSet(null, null);
             SpokenControlNameCommandSet.AddReservedVariables();
             SpokenControlNameCommandSet.ParseFile(parseTree, "");
             SpokenControlNameCommandSet.Bind();
@@ -463,8 +463,7 @@ namespace Vocola
             }
             if (parseTree.GetChildCount() > 0)
             {
-                CommandSet commandSet = new CommandSet(this);
-                commandSet.AppName = appName;
+                CommandSet commandSet = new CommandSet(this, appName);
                 try
                 {
                     commandSet.AddReservedVariables();
