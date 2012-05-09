@@ -201,7 +201,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
-    <None Include="Parser\createParser.pl" />
+    <None Include="Parser\MAKEFILE" />
     <None Include="Parser\Vocola.grammar" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
@@ -284,7 +284,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>REM cd $(ProjectDir) &amp; perl createParser.pl</PreBuildEvent>
+    <PreBuildEvent>cd $(ProjectDir)\Parser &amp; "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\nmake.exe"</PreBuildEvent>
     <PostBuildEvent>REM "C:\Program Files\Microsoft Visual Studio 8\VC\bin\mt.exe" -manifest "$(ProjectDir)Properties\app.manifest" -outputresource:"$(TargetPath)";#1"
 
 REM Sign target executable

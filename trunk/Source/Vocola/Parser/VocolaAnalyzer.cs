@@ -6,7 +6,7 @@
  * Permission is granted to copy this document verbatim in any
  * medium, provided that this copyright notice is left intact.
  * 
- * Copyright (c) 2008 Rick Mohr. All rights reserved.
+ * Copyright (c) 2008-2012 Rick Mohr. All rights reserved.
  */
 
 using PerCederberg.Grammatica.Parser;
@@ -47,6 +47,9 @@ namespace Vocola {
             case (int) VocolaConstants.RANGE:
                 EnterRange((Token) node);
                 break;
+            case (int) VocolaConstants.NUMBER:
+                EnterNumber((Token) node);
+                break;
             case (int) VocolaConstants.CHARS:
                 EnterChars((Token) node);
                 break;
@@ -80,6 +83,12 @@ namespace Vocola {
             case (int) VocolaConstants.ENDIF_T:
                 EnterEndifT((Token) node);
                 break;
+            case (int) VocolaConstants.SET_T:
+                EnterSetT((Token) node);
+                break;
+            case (int) VocolaConstants.MAXCMD_T:
+                EnterMaxcmdT((Token) node);
+                break;
             case (int) VocolaConstants.OR:
                 EnterOr((Token) node);
                 break;
@@ -106,6 +115,9 @@ namespace Vocola {
                 break;
             case (int) VocolaConstants.FILE:
                 EnterFile((Production) node);
+                break;
+            case (int) VocolaConstants.SETMAXSEQ:
+                EnterSetmaxseq((Production) node);
                 break;
             case (int) VocolaConstants.USING:
                 EnterUsing((Production) node);
@@ -195,6 +207,8 @@ namespace Vocola {
                 return ExitReference((Token) node);
             case (int) VocolaConstants.RANGE:
                 return ExitRange((Token) node);
+            case (int) VocolaConstants.NUMBER:
+                return ExitNumber((Token) node);
             case (int) VocolaConstants.CHARS:
                 return ExitChars((Token) node);
             case (int) VocolaConstants.QUOTED_CHARS:
@@ -217,6 +231,10 @@ namespace Vocola {
                 return ExitElseT((Token) node);
             case (int) VocolaConstants.ENDIF_T:
                 return ExitEndifT((Token) node);
+            case (int) VocolaConstants.SET_T:
+                return ExitSetT((Token) node);
+            case (int) VocolaConstants.MAXCMD_T:
+                return ExitMaxcmdT((Token) node);
             case (int) VocolaConstants.OR:
                 return ExitOr((Token) node);
             case (int) VocolaConstants.BRACKET_L:
@@ -235,6 +253,8 @@ namespace Vocola {
                 return ExitComma((Token) node);
             case (int) VocolaConstants.FILE:
                 return ExitFile((Production) node);
+            case (int) VocolaConstants.SETMAXSEQ:
+                return ExitSetmaxseq((Production) node);
             case (int) VocolaConstants.USING:
                 return ExitUsing((Production) node);
             case (int) VocolaConstants.STATEMENTS:
@@ -293,6 +313,9 @@ namespace Vocola {
             switch (node.GetId()) {
             case (int) VocolaConstants.FILE:
                 ChildFile(node, child);
+                break;
+            case (int) VocolaConstants.SETMAXSEQ:
+                ChildSetmaxseq(node, child);
                 break;
             case (int) VocolaConstants.USING:
                 ChildUsing(node, child);
@@ -510,6 +533,32 @@ namespace Vocola {
          * discovered errors</exception>
          */
         public virtual Node ExitRange(Token node) {
+            return node;
+        }
+
+        /**
+         * <summary>Called when entering a parse tree node.</summary>
+         * 
+         * <param name='node'>the node being entered</param>
+         * 
+         * <exception cref='ParseException'>if the node analysis
+         * discovered errors</exception>
+         */
+        public virtual void EnterNumber(Token node) {
+        }
+
+        /**
+         * <summary>Called when exiting a parse tree node.</summary>
+         * 
+         * <param name='node'>the node being exited</param>
+         * 
+         * <returns>the node to add to the parse tree, or
+         *          null if no parse tree should be created</returns>
+         * 
+         * <exception cref='ParseException'>if the node analysis
+         * discovered errors</exception>
+         */
+        public virtual Node ExitNumber(Token node) {
             return node;
         }
 
@@ -807,6 +856,58 @@ namespace Vocola {
          * <exception cref='ParseException'>if the node analysis
          * discovered errors</exception>
          */
+        public virtual void EnterSetT(Token node) {
+        }
+
+        /**
+         * <summary>Called when exiting a parse tree node.</summary>
+         * 
+         * <param name='node'>the node being exited</param>
+         * 
+         * <returns>the node to add to the parse tree, or
+         *          null if no parse tree should be created</returns>
+         * 
+         * <exception cref='ParseException'>if the node analysis
+         * discovered errors</exception>
+         */
+        public virtual Node ExitSetT(Token node) {
+            return node;
+        }
+
+        /**
+         * <summary>Called when entering a parse tree node.</summary>
+         * 
+         * <param name='node'>the node being entered</param>
+         * 
+         * <exception cref='ParseException'>if the node analysis
+         * discovered errors</exception>
+         */
+        public virtual void EnterMaxcmdT(Token node) {
+        }
+
+        /**
+         * <summary>Called when exiting a parse tree node.</summary>
+         * 
+         * <param name='node'>the node being exited</param>
+         * 
+         * <returns>the node to add to the parse tree, or
+         *          null if no parse tree should be created</returns>
+         * 
+         * <exception cref='ParseException'>if the node analysis
+         * discovered errors</exception>
+         */
+        public virtual Node ExitMaxcmdT(Token node) {
+            return node;
+        }
+
+        /**
+         * <summary>Called when entering a parse tree node.</summary>
+         * 
+         * <param name='node'>the node being entered</param>
+         * 
+         * <exception cref='ParseException'>if the node analysis
+         * discovered errors</exception>
+         */
         public virtual void EnterOr(Token node) {
         }
 
@@ -1044,6 +1145,46 @@ namespace Vocola {
          * discovered errors</exception>
          */
         public virtual void ChildFile(Production node, Node child) {
+            node.AddChild(child);
+        }
+
+        /**
+         * <summary>Called when entering a parse tree node.</summary>
+         * 
+         * <param name='node'>the node being entered</param>
+         * 
+         * <exception cref='ParseException'>if the node analysis
+         * discovered errors</exception>
+         */
+        public virtual void EnterSetmaxseq(Production node) {
+        }
+
+        /**
+         * <summary>Called when exiting a parse tree node.</summary>
+         * 
+         * <param name='node'>the node being exited</param>
+         * 
+         * <returns>the node to add to the parse tree, or
+         *          null if no parse tree should be created</returns>
+         * 
+         * <exception cref='ParseException'>if the node analysis
+         * discovered errors</exception>
+         */
+        public virtual Node ExitSetmaxseq(Production node) {
+            return node;
+        }
+
+        /**
+         * <summary>Called when adding a child to a parse tree
+         * node.</summary>
+         * 
+         * <param name='node'>the parent node</param>
+         * <param name='child'>the child node, or null</param>
+         * 
+         * <exception cref='ParseException'>if the node analysis
+         * discovered errors</exception>
+         */
+        public virtual void ChildSetmaxseq(Production node, Node child) {
             node.AddChild(child);
         }
 

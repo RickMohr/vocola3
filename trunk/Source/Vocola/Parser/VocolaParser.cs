@@ -6,7 +6,7 @@
  * Permission is granted to copy this document verbatim in any
  * medium, provided that this copyright notice is left intact.
  * 
- * Copyright (c) 2008 Rick Mohr. All rights reserved.
+ * Copyright (c) 2008-2012 Rick Mohr. All rights reserved.
  */
 
 using System.IO;
@@ -84,8 +84,19 @@ namespace Vocola {
             pattern = new ProductionPattern((int) VocolaConstants.FILE,
                                             "file");
             alt = new ProductionPatternAlternative();
+            alt.AddProduction((int) VocolaConstants.SETMAXSEQ, 0, 1);
             alt.AddProduction((int) VocolaConstants.USING, 0, -1);
             alt.AddProduction((int) VocolaConstants.STATEMENTS, 1, 1);
+            pattern.AddAlternative(alt);
+            AddPattern(pattern);
+
+            pattern = new ProductionPattern((int) VocolaConstants.SETMAXSEQ,
+                                            "setmaxseq");
+            alt = new ProductionPatternAlternative();
+            alt.AddToken((int) VocolaConstants.SET_T, 1, 1);
+            alt.AddToken((int) VocolaConstants.MAXCMD_T, 1, 1);
+            alt.AddToken((int) VocolaConstants.NUMBER, 1, 1);
+            alt.AddToken((int) VocolaConstants.STOP, 1, 1);
             pattern.AddAlternative(alt);
             AddPattern(pattern);
 
@@ -376,6 +387,9 @@ namespace Vocola {
             pattern.AddAlternative(alt);
             alt = new ProductionPatternAlternative();
             alt.AddToken((int) VocolaConstants.NAME, 1, 1);
+            pattern.AddAlternative(alt);
+            alt = new ProductionPatternAlternative();
+            alt.AddToken((int) VocolaConstants.NUMBER, 1, 1);
             pattern.AddAlternative(alt);
             alt = new ProductionPatternAlternative();
             alt.AddToken((int) VocolaConstants.CHARS, 1, 1);

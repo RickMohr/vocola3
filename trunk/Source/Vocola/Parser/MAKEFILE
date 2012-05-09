@@ -1,0 +1,2 @@
+VocolaParser.cs: Vocola.grammar
+	java -jar "c:/Programs/grammatica-1.4/lib/grammatica-1.4.jar" Vocola.grammar --csoutput . --csnamespace Vocola
