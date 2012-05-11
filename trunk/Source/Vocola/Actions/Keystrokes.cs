@@ -10,8 +10,8 @@ namespace Vocola
 
     public class Keystrokes
     {
-		//private static bool UseKeystrokes1 = true;
-		private static bool UseKeystrokes1 = false;
+		private static bool UseKeystrokes1 = true;
+		//private static bool UseKeystrokes1 = false;
 
         static public void Initialize()
         {
