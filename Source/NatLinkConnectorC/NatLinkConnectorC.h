@@ -79,6 +79,11 @@ extern "C"
 
 	// NatLink to Vocola
 
+	int __declspec(dllexport) __stdcall HaveAnyGrammarFilesChanged()
+	{
+		return Vocola::NatLinkToVocolaClient::HaveAnyGrammarFilesChanged();
+	}
+
 	void __declspec(dllexport) __stdcall RunActions(const wchar_t* commandId, const wchar_t* variableWords)
 	{
 		Vocola::NatLinkToVocolaClient::RunActions(gcnew String(commandId), gcnew String(variableWords));

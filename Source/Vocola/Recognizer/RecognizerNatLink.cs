@@ -14,12 +14,15 @@ namespace Vocola
     {
         private string GrammarsFolder = @"C:\Programs\NatLink\NatLink\MacroSystem";
         private string NatLinkConnectorDllPath = Path.Combine(Application.StartupPath, "NatLinkConnectorC.dll");
+		public DateTime LastGrammarUpdateTime { get; private set; }
+		public DateTime LastGrammarCreationTime { get; private set; }
 
         public override void Initialize()
         {
             ReadRegistry();
             CleanGrammarsFolder();
-            NatLinkListener.Start();
+			NatLinkListener.Start();
+			EmitVocolaMain();
         }
 
         private void ReadRegistry()
@@ -49,11 +52,16 @@ namespace Vocola
             try
             {
                 string moduleName = Path.GetFileNameWithoutExtension(loadedFile.Filename);
-                string grammarFilename = Path.Combine(GrammarsFolder, moduleName + "_vcl.py");
-                grammarFilename = grammarFilename.Replace('@', '_');
+                string grammarFilePath = Path.Combine(GrammarsFolder, moduleName + "_vcl.py");
+                grammarFilePath = grammarFilePath.Replace('@', '_');
                 moduleName = moduleName.ToLower();
-                if (loadedFile.ShouldActivateCommands())
-                    EmitGrammarFile(loadedFile.CommandSet, grammarFilename, moduleName);
+				if (loadedFile.ShouldActivateCommands())
+				{
+					LastGrammarUpdateTime = DateTime.Now;
+					if (!File.Exists(grammarFilePath))
+						LastGrammarCreationTime = DateTime.Now;
+					EmitGrammarFile(loadedFile.CommandSet, grammarFilePath, moduleName);
+				}
             }
             catch (Exception e)
             {
@@ -76,11 +84,11 @@ namespace Vocola
         // ---------------------------------------------------------------------
         // Convert one Vocola command file to a NatLink grammar file
 
-        private void EmitGrammarFile(CommandSet commandSet, string grammarFilename, string moduleName)
+		private void EmitGrammarFile(CommandSet commandSet, string grammarFilePath, string moduleName)
         {
             try
             {
-                using (TheOutputStream = new StreamWriter(grammarFilename, false, System.Text.Encoding.GetEncoding(1252)))
+				using (TheOutputStream = new StreamWriter(grammarFilePath, false, System.Text.Encoding.GetEncoding(1252)))
                 {
                     EmitFileHeader();
                     EmitDictationGrammar();
@@ -95,7 +103,7 @@ namespace Vocola
             catch (Exception ex)
             {
                 Trace.WriteLine(LogLevel.Error, "Exception writing grammar file '{0}':\n {1}",
-                    grammarFilename, ex.Message);
+					grammarFilePath, ex.Message);
             }
         }
 
@@ -167,10 +175,10 @@ namespace Vocola
                     WordTerm wt = (WordTerm)term;
                     if (IsOptionalTerm(wt))
                         Emit("[ ");
-					string[] words = wt.Text.Split(' ');
-					if (TermHasAlternates(words))
-						EmitTermWithAlternates(words);
-					else
+					//string[] words = wt.Text.Split(' ');
+					//if (TermHasAlternates(words))
+					//    EmitTermWithAlternates(words);
+					//else
 						Emit("{0} ", MakeQuotedString(wt.Text));
                     if (IsOptionalTerm(wt))
                         Emit("] ");
@@ -452,7 +460,7 @@ namespace Vocola
         // ---------------------------------------------------------------------------
         // Utilities for transforming command terms into NatLink rules 
         //
-        // For each Vocola command, we define a NatLink rule and an associated
+        // For each Vocola command, we define a NatLink ruIf ifle and an associated
         // "gotResults" function. When the command is spoken, we want the gotResults
         // function to be called exactly once. But life is difficult -- NatLink calls a
         // gotResults function once for each contiguous sequence of spoken words
@@ -590,6 +598,62 @@ namespace Vocola
         // ---------------------------------------------------------------------------
         // Pieces of the output Python file
 
+		private void EmitVocolaMain()
+		{
+			string path = Path.Combine(GrammarsFolder, "_vocola_main.py");
+			using (TheOutputStream = new StreamWriter(path, false, Encoding.GetEncoding(1252)))
+			{
+				Emit(@"
+import natlink
+from natlinkutils import *
+import ctypes
+from ctypes import CFUNCTYPE, c_wchar_p, c_int
+
+VocolaEnabled = True
+
+class ThisGrammar(GrammarBase):
+
+    def initialize(self):
+        global vocolaConnector
+");
+				EmitLine(2, "print 'Vocola {0} starting...'", Vocola.Version);
+				EmitLine(2, "vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
+				EmitLine(2, "vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
+				Emit(@"
+        MYFUNCTYPE = CFUNCTYPE(c_int, c_wchar_p)
+        self.myFunc = MYFUNCTYPE(emulateRecognize)
+        vocolaConnector.SetCallbacks(self.myFunc)
+
+# When speech is heard, vocolaBeginCallback is called (from natlinkmain) before any others.
+# Return values indicate whether Vocola has changed any .py files since the last call:
+#     0 - No changes
+#     1 - A .py file changed
+#     2 - A .py file was created
+#
+# (Note natlinkmain guarantees we are not called with CallbackDepth > 1)
+
+def vocolaBeginCallback(moduleInfo):
+    result = vocolaConnector.HaveAnyGrammarFilesChanged()
+    #print 'vocola files changed: %i'% result
+    return result
+
+def emulateRecognize(words):
+    try: natlink.recognitionMimic(words.encode('ascii','replace').split(' '))
+    except: return -1
+    return 0
+
+
+thisGrammar = ThisGrammar()
+thisGrammar.initialize()
+
+def unload():
+    global thisGrammar
+    if thisGrammar: thisGrammar.unload()
+    thisGrammar = None
+");
+			}
+		}
+
         private void EmitFileHeader()
         {
             EmitLine(0, "# NatLink macro definitions, for Dragon NaturallySpeaking"); 
@@ -599,12 +663,6 @@ namespace Vocola
 import natlink
 from natlinkutils import *
 import ctypes
-from ctypes import CFUNCTYPE, c_wchar_p, c_int
-
-def emulateRecognize(words):
-    try: natlink.recognitionMimic(words.encode('ascii','replace').split(' '))
-    except: return -1
-    return 0
 
 class ThisGrammar(GrammarBase):
 
@@ -618,12 +676,9 @@ class ThisGrammar(GrammarBase):
             EmitLine(0, "\"\"\"");
             EmitLine(1, "def initialize(self):");
             EmitLine(2, "print 'Loading Vocola commands for {0}'", moduleName);
-            EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
+			EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
             EmitLine(2, "self.vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
             Emit(@"
-        MYFUNCTYPE = CFUNCTYPE(c_int, c_wchar_p)
-        self.myFunc = MYFUNCTYPE(emulateRecognize)
-        self.vocolaConnector.SetCallbacks(self.myFunc)
         self.load(self.gramSpec)
         self.currentModule = ("","",0)
 ");
