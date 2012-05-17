@@ -40,9 +40,9 @@ Assembly^ CurrentDomain_AssemblyResolve(Object^ sender, ResolveEventArgs^ args)
     }
 }
 
-void ReallyInitializeConnection()
+bool ReallyInitializeConnection()
 {
-    Vocola::NatLinkToVocolaClient::InitializeConnection();
+	return Vocola::NatLinkToVocolaClient::InitializeConnection();
 }
 
 
@@ -51,24 +51,24 @@ extern "C"
 
 	// Initialization
 
-	void __declspec(dllexport) __stdcall InitializeConnection(const wchar_t* vocolaExecutionFolder)
+	int __declspec(dllexport) __stdcall InitializeConnection(const wchar_t* vocolaExecutionFolder)
 	{
 		try
 		{
 			if (Initialized)
-				return;
+				return 1;
 			wcscpy_s(VocolaExecutionFolder, vocolaExecutionFolder);
 
 			// The executing AppDomain's "CodeBase" is the Python executable folder, so we have to specify how to find assemblies
 			AppDomain::CurrentDomain->AssemblyResolve += gcnew ResolveEventHandler(CurrentDomain_AssemblyResolve);
 
 			// If InitializeConnection() isn't called in a separate function the assembly load fails before the resolver is established
-			ReallyInitializeConnection();
-			Initialized = true;
+			Initialized = ReallyInitializeConnection();
+			return (Initialized ? 1 : 0);
 		}
 		catch (Exception^ ex)
 		{
-			MessageBox::Show(ex->Message);
+			//MessageBox::Show(ex->Message);
 		}
 	}
 
