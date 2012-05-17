@@ -596,7 +596,7 @@ namespace Vocola
         }
 
         // ---------------------------------------------------------------------------
-        // Pieces of the output Python file
+		// Emit _vocola_main.py (grammar file treated specially by NatLink)
 
 		private void EmitVocolaMain()
 		{
@@ -616,9 +616,12 @@ class ThisGrammar(GrammarBase):
     def initialize(self):
         global vocolaConnector
 ");
-				EmitLine(2, "print 'Vocola {0} starting...'", Vocola.Version);
 				EmitLine(2, "vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
-				EmitLine(2, "vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
+				EmitLine(2, "connected = vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
+				EmitLine(2, "if connected == 0:");
+				EmitLine(2, "    print 'Vocola is enabled but not running'");
+				EmitLine(2, "    return");
+				EmitLine(2, "print 'Vocola {0} starting...'", Vocola.Version);
 				Emit(@"
         MYFUNCTYPE = CFUNCTYPE(c_int, c_wchar_p)
         self.myFunc = MYFUNCTYPE(emulateRecognize)
@@ -633,7 +636,9 @@ class ThisGrammar(GrammarBase):
 # (Note natlinkmain guarantees we are not called with CallbackDepth > 1)
 
 def vocolaBeginCallback(moduleInfo):
-    result = vocolaConnector.HaveAnyGrammarFilesChanged()
+    result = 0
+    try: result = vocolaConnector.HaveAnyGrammarFilesChanged()
+    except: pass
     #print 'vocola files changed: %i'% result
     return result
 
@@ -653,6 +658,9 @@ def unload():
 ");
 			}
 		}
+
+		// ---------------------------------------------------------------------------
+		// Emit pieces of Python grammar files
 
         private void EmitFileHeader()
         {
@@ -675,10 +683,11 @@ class ThisGrammar(GrammarBase):
             EmitLine(0, "");
             EmitLine(0, "\"\"\"");
             EmitLine(1, "def initialize(self):");
-            EmitLine(2, "print 'Loading Vocola commands for {0}'", moduleName);
 			EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
-            EmitLine(2, "self.vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
-            Emit(@"
+			EmitLine(2, "connected = self.vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
+			EmitLine(2, "if connected == 0: return");
+			EmitLine(2, "print 'Loading Vocola commands for {0}'", moduleName);
+			Emit(@"
         self.load(self.gramSpec)
         self.currentModule = ("","",0)
 ");
