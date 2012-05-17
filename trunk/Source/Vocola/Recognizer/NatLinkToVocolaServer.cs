@@ -26,10 +26,26 @@ namespace Vocola
     public class NatLinkToVocolaServer : MarshalByRefObject, INatLinkToVocola
     {
 		private static Stack<NatLinkCallbackHandler> CallbackHandlers = new Stack<NatLinkCallbackHandler>();
+		private DateTime LastGrammarQueryTime = new DateTime(0);
 
 		public static NatLinkCallbackHandler CurrentNatLinkCallbackHandler
 		{
 			get { return CallbackHandlers.Peek(); }
+		}
+
+		public int HaveAnyGrammarFilesChanged()
+		{
+			int result = 0; // nothing changed
+			if (((RecognizerNatLink)Vocola.TheRecognizer).LastGrammarCreationTime > LastGrammarQueryTime)
+			{
+				result = 2; // a previously-nonexistent grammar file was created
+			}
+			else if (((RecognizerNatLink)Vocola.TheRecognizer).LastGrammarUpdateTime > LastGrammarQueryTime)
+			{
+				result = 1; // an existing grammar file was changed
+			}
+			LastGrammarQueryTime = DateTime.Now;
+			return result;
 		}
 
 		public void RunActions(string commandId, string variableWords, NatLinkCallbackHandler callbackHandler)

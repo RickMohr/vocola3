@@ -10,6 +10,7 @@ namespace Vocola
 
 	public interface INatLinkToVocola
 	{
+		int HaveAnyGrammarFilesChanged();
 		void RunActions(string commandId, string variableWords, NatLinkCallbackHandler callbackHandler);
 		void LogMessage(int level, string message);
 	}
@@ -29,6 +30,11 @@ namespace Vocola
 			ChannelServices.RegisterChannel(channel, false);
 			string url = "ipc://NatLinkToVocolaServerChannel/NatLinkToVocolaListener";
 			ToVocola = (INatLinkToVocola)Activator.GetObject(typeof(INatLinkToVocola), url);
+		}
+
+		static public int HaveAnyGrammarFilesChanged()
+		{
+			return ToVocola.HaveAnyGrammarFilesChanged();
 		}
 
 		static public void RunActions(string commandId, string variableWords)
