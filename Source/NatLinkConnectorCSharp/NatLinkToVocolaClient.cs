@@ -25,20 +25,22 @@ namespace Vocola
 
 		static public bool InitializeConnection()
 		{
-			// Set up channel for callbacks
-			var prov = new BinaryServerFormatterSinkProvider() { TypeFilterLevel = TypeFilterLevel.Full };
-			var channel = new IpcServerChannel("NatLinkToVocolaClientChannel", "NatLinkToVocolaClientChannel", prov);
-			ChannelServices.RegisterChannel(channel, false);
-
 			// Get server object
 			string url = "ipc://NatLinkToVocolaServerChannel/NatLinkToVocolaListener";
 			ToVocola = (INatLinkToVocola)Activator.GetObject(typeof(INatLinkToVocola), url);
 			try
 			{
+				// This will fail if Vocola is not running
 				ToVocola.LogMessage(1, "NatLink connection initialized");
+
+				// Set up channel for callbacks
+				var prov = new BinaryServerFormatterSinkProvider() { TypeFilterLevel = TypeFilterLevel.Full };
+				var channel = new IpcServerChannel("NatLinkToVocolaClientChannel", "NatLinkToVocolaClientChannel", prov);
+				ChannelServices.RegisterChannel(channel, false);
+
 				return true;
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				return false;
 			}
