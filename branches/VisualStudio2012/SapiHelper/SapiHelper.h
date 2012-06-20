@@ -2,7 +2,7 @@
 
 #include <sphelper.h>
 #include <Vcclr.h>  // PtrToStringChars
-#include "alternates_h.h"  // ISpDisplayAlternates
+//#include "alternates_h.h"  // ISpDisplayAlternates
 
 #define MAX_TOKENS 200
 #define MAX_ACOUSTIC_ALTERNATES 100

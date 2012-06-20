@@ -66,7 +66,7 @@ extern "C"
 			Initialized = ReallyInitializeConnection();
 			return (Initialized ? 1 : 0);
 		}
-		catch (Exception^ ex)
+		catch (Exception^)
 		{
 			//MessageBox::Show(ex->Message);
 		}

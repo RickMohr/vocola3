@@ -284,7 +284,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>cd $(ProjectDir)\Parser &amp; "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\nmake.exe"</PreBuildEvent>
+    <PreBuildEvent>REM  cd $(ProjectDir)\Parser &amp; "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\nmake.exe"</PreBuildEvent>
     <PostBuildEvent>REM "C:\Program Files\Microsoft Visual Studio 8\VC\bin\mt.exe" -manifest "$(ProjectDir)Properties\app.manifest" -outputresource:"$(TargetPath)";#1"
 
 REM Sign target executable
