@@ -1,0 +1,31 @@
+import "oaidl.idl";
+
+typedef [restricted, hidden] struct SPDISPLAYTOKEN
+{
+    const WCHAR    *pszLexical;
+    const WCHAR    *pszDisplay;
+    BYTE            bDisplayAttributes;
+} SPDISPLAYTOKEN;
+
+typedef [restricted, hidden] struct SPDISPLAYPHRASE
+{
+    ULONG            ulNumTokens;
+    SPDISPLAYTOKEN  *pTokens;
+} SPDISPLAYPHRASE;
+
+[
+    object,
+    uuid(C8D7C7E2-0DDE-44b7-AFE3-B0C991FBEB5E),
+    helpstring("ISpDisplayAlternates Interface"),
+    pointer_default(unique),
+    local
+]
+interface ISpDisplayAlternates : IUnknown
+{
+    HRESULT GetDisplayAlternates(
+        [in] const SPDISPLAYPHRASE *pPhrase,
+        [in] ULONG cRequestCount,
+        [out] SPDISPLAYPHRASE **ppCoMemPhrases,
+        [out] ULONG *pcPhrasesReturned);
+    HRESULT SetFullStopTrailSpace([in] ULONG ulTrailSpace);
+}
