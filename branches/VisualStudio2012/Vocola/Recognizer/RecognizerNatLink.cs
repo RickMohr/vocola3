@@ -91,8 +91,9 @@ namespace Vocola
 				using (TheOutputStream = new StreamWriter(grammarFilePath, false, System.Text.Encoding.GetEncoding(1252)))
                 {
                     EmitFileHeader();
-                    EmitDictationGrammar();
                     EmitGrammars(commandSet);
+                    if (commandSet.ReferencesDictationVariable)
+                        EmitDictationGrammar();
                     EmitSequenceRules(commandSet, 0);
                     EmitFileMiddle(moduleName);
                     EmitActivations(commandSet, moduleName);

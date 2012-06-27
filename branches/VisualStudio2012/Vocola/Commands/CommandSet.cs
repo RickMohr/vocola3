@@ -25,6 +25,7 @@ namespace Vocola
         public  bool HasLanguageException { get; private set; }
 		public int MaxSequencedCommands { get; private set; }
 		public  int SequenceRuleNumber; // used by RecognizerNatLink
+        public bool ReferencesDictationVariable { get; private set; }
 
         public CommandSet(LoadedFile loadedFile, string appName)
         {
@@ -77,6 +78,7 @@ namespace Vocola
             // and neither abort binding nor invalidate the command.
 
             // Resolve variable and function references in commands
+            ReferencesDictationVariable = false;
             BindCommands(Commands);
 
             // Resolve variable and function references in variable definitions
@@ -134,6 +136,8 @@ namespace Vocola
             if (Variables.TryGetValue(variableTerm.Name, out variable))
             {
                 variableTerm.Variable = variable;
+                if (variable.Name == "_anything")
+                    ReferencesDictationVariable = true;
                 return true;
             }
             // Look (recursively) in ancestor command sets
