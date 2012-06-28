@@ -555,7 +555,7 @@ namespace Vocola
         public bool ShouldActivateCommands()
         {
             bool isDisabledBuiltinsFile = (IsBuiltinsFile && BuiltinCommandGroup.IsDisabled(Filename));
-            bool hasCommands = (CommandSet != null && CommandSet.Commands.Count > 0);
+            bool hasCommands = (CommandSet != null && CommandSet.HasCommands);
             return (hasCommands && !isDisabledBuiltinsFile);
         }
 

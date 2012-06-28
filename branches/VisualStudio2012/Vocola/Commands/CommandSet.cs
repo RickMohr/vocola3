@@ -69,6 +69,20 @@ namespace Vocola
 
 		public bool IsGlobal { get { return (AppName == null); } }
 
+        public bool HasCommands
+        {
+            get
+            {
+                if (Commands.Count > 0)
+                    return true;
+                foreach (var ifGroup in ConditionalCommandSets)
+                    foreach (var cs in ifGroup)
+                        if (cs.HasCommands)
+                            return true;
+                return false;
+            }
+        }
+
         // ---------------------------------------------------------------------
         // Binding
 
