@@ -214,20 +214,26 @@ namespace Vocola
         // ---------------------------------------------------------------------
         // Watch for changes in command files
 
-        static private void WatchCommandFolder()
+        private static void WatchCommandFolder()
         {
             if (Directory.Exists(CommandFolder))
             {
-                FileSystemWatcher watcher = new FileSystemWatcher();
-                watcher.Path = CommandFolder;
-                watcher.IncludeSubdirectories = true;
-                watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-                watcher.Filter = "*.vc*";
-                watcher.Changed += new FileSystemEventHandler(OnCommandFileChanged);
-                watcher.Deleted += new FileSystemEventHandler(OnCommandFileDeleted);
-                watcher.Renamed += new RenamedEventHandler(OnCommandFileRenamed);
-                watcher.EnableRaisingEvents = true;
+                CreateWatcher("*.vcl");
+                CreateWatcher("*.vch");
             }
+        }
+
+        private static void CreateWatcher(string filter)
+        {
+            FileSystemWatcher watcher = new FileSystemWatcher();
+            watcher.Path = CommandFolder;
+            watcher.IncludeSubdirectories = true;
+            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+            watcher.Filter = filter;
+            watcher.Changed += new FileSystemEventHandler(OnCommandFileChanged);
+            watcher.Deleted += new FileSystemEventHandler(OnCommandFileDeleted);
+            watcher.Renamed += new RenamedEventHandler(OnCommandFileRenamed);
+            watcher.EnableRaisingEvents = true;
         }
 
         static private void OnCommandFileChanged(object source, FileSystemEventArgs e)
