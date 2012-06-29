@@ -46,18 +46,25 @@ namespace Vocola
         public bool HasWildcardTerm;
         public string UniqueId;
         public object Rule;
+        private string Text;
 
         public Command(ArrayList terms, ArrayList actions)
         {
             Terms = terms;
             Actions = actions;
+            Text = GetCommandText();
         }
 
-        public override string ToString()
+        private string GetCommandText()
         {
             string terms = ArrayListToString(Terms, " ");
             string actions = ArrayListToString(Actions, " ");
             return (terms == actions || Actions == null ? terms : terms + " = " + actions);
+        }
+
+        public override string ToString()
+        {
+            return Text;
         }
 
         public string TermsToString()
