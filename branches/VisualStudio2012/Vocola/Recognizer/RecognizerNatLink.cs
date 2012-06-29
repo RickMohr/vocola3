@@ -25,11 +25,6 @@ namespace Vocola
 			EmitVocolaMain();
         }
 
-        public override void Exit()
-        {
-            CleanGrammarsFolder();
-        }
-
         private void ReadRegistry()
         {
 			RegistryKey key = Registry.CurrentUser.CreateSubKey(Path.Combine(Vocola.RegistryKeyName, "NatLinkRecognizer"));
@@ -68,13 +63,15 @@ namespace Vocola
                 string grammarFilePath = Path.Combine(GrammarsFolder, moduleName + "_vcl.py");
                 grammarFilePath = grammarFilePath.Replace('@', '_');
                 moduleName = moduleName.ToLower();
-				if (loadedFile.ShouldActivateCommands())
-				{
-					LastGrammarUpdateTime = DateTime.Now;
-					if (!File.Exists(grammarFilePath))
-						LastGrammarCreationTime = DateTime.Now;
-					EmitGrammarFile(loadedFile.CommandSet, grammarFilePath, moduleName);
-				}
+                if (loadedFile.ShouldActivateCommands())
+                {
+                    if (!File.Exists(grammarFilePath))
+                        LastGrammarCreationTime = DateTime.Now;
+                    EmitGrammarFile(loadedFile.CommandSet, grammarFilePath, moduleName);
+                }
+                else
+                    DeleteFileIfPresent(grammarFilePath);
+                LastGrammarUpdateTime = DateTime.Now;
             }
             catch (Exception e)
             {
@@ -92,6 +89,11 @@ namespace Vocola
         public override void DisplayMessage(string message, bool isWarning)
         {
             Trace.WriteLine(isWarning ? LogLevel.Error : LogLevel.High, message);
+        }
+
+        public override void Exit()
+        {
+            CleanGrammarsFolder();
         }
 
         // ---------------------------------------------------------------------
@@ -655,7 +657,9 @@ class ThisGrammar(GrammarBase):
 def vocolaBeginCallback(moduleInfo):
     result = 0
     try: result = vocolaConnector.HaveAnyGrammarFilesChanged()
-    except: print 'Vocola is not responding'
+    except: 
+        print 'Vocola is not responding'
+        result = 1   # Vocola deletes grammar files on exit
     #print 'vocola files changed: %i'% result
     return result
 
