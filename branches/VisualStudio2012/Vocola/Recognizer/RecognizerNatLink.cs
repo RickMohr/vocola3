@@ -25,6 +25,11 @@ namespace Vocola
 			EmitVocolaMain();
         }
 
+        public override void Exit()
+        {
+            CleanGrammarsFolder();
+        }
+
         private void ReadRegistry()
         {
 			RegistryKey key = Registry.CurrentUser.CreateSubKey(Path.Combine(Vocola.RegistryKeyName, "NatLinkRecognizer"));
@@ -35,6 +40,14 @@ namespace Vocola
             foreach (string pathname in Directory.GetFiles(GrammarsFolder, "*_vcl.py"))
                 DeleteFile(pathname);
             foreach (string pathname in Directory.GetFiles(GrammarsFolder, "*_vcl.pyc"))
+                DeleteFile(pathname);
+            DeleteFileIfPresent(Path.Combine(GrammarsFolder, "_vocola_main.py"));
+            DeleteFileIfPresent(Path.Combine(GrammarsFolder, "_vocola_main.pyc"));
+        }
+
+        private void DeleteFileIfPresent(string pathname)
+        {
+            if (File.Exists(pathname))
                 DeleteFile(pathname);
         }
 
@@ -329,9 +342,10 @@ namespace Vocola
             EmitLine(2, "self.deactivateAll()");
 			if (commandSet.Commands.Count > 0)
 			{
-				EmitLine(2, "self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1})'))",
+				EmitLine(2, "try: self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1})'))",
 					moduleName, commandSet.Commands.Count);
-				if (commandSet.IsGlobal)
+                EmitLine(2, "except: return");
+                if (commandSet.IsGlobal)
 					EmitLine(2, "self.activate('sequence_0')");
 				else
 					EmitLine(2, "self.activate('sequence_0', window)");
@@ -394,8 +408,10 @@ namespace Vocola
 
             EmitLine(1, "# {0}", command.TermsToString());
             EmitLine(1, "def {0}(self, words, fullResults):", functionName);
-			EmitLine(2, "if self.firstWord == 0: self.logSpokenCommand(fullResults)");
-			EmitOptionalTermFixup(terms);
+            EmitLine(2, "if self.firstWord == 0:");
+            EmitLine(2, "    try: self.logSpokenCommand(fullResults)");
+            EmitLine(2, "    except: return");
+            EmitOptionalTermFixup(terms);
             EmitLine(2, "variableTerms = ''");
 
             int termNumber = 0;
@@ -622,7 +638,7 @@ class ThisGrammar(GrammarBase):
 				EmitLine(2, "if connected == 0:");
 				EmitLine(2, "    print 'Vocola is enabled but not running'");
 				EmitLine(2, "    return");
-				EmitLine(2, "print 'Vocola {0} starting...'", Vocola.Version);
+				EmitLine(2, "print 'Vocola {0} is running'", Vocola.Version);
 				Emit(@"
         MYFUNCTYPE = CFUNCTYPE(c_int, c_wchar_p)
         self.myFunc = MYFUNCTYPE(emulateRecognize)
@@ -639,7 +655,7 @@ class ThisGrammar(GrammarBase):
 def vocolaBeginCallback(moduleInfo):
     result = 0
     try: result = vocolaConnector.HaveAnyGrammarFilesChanged()
-    except: pass
+    except: print 'Vocola is not responding'
     #print 'vocola files changed: %i'% result
     return result
 
@@ -687,7 +703,7 @@ class ThisGrammar(GrammarBase):
 			EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
 			EmitLine(2, "connected = self.vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
 			EmitLine(2, "if connected == 0: return");
-			EmitLine(2, "print 'Loading Vocola commands for {0}'", moduleName);
+			EmitLine(2, "#print 'Loading Vocola commands for {0}'", moduleName);
 			Emit(@"
         self.load(self.gramSpec)
         self.currentModule = ("","",0)
@@ -700,10 +716,10 @@ class ThisGrammar(GrammarBase):
     # Massage recognition results to make a single entry for each <dgndictation> result.
 
     def logSpokenCommand(self, fullResults):
-		words = map(lambda t : t[0], fullResults)
-		phrase = ' '.join(words)
-		self.vocolaConnector.LogMessage(1, 'Command: ' + unicode(phrase))
-		if words == 1: print self.myFunc # hack to keep myFunc from being deallocated
+        words = map(lambda t : t[0], fullResults)
+        phrase = ' '.join(words)
+        self.vocolaConnector.LogMessage(1, 'Command: ' + unicode(phrase))
+        if words == 1: print self.myFunc # hack to keep myFunc from being deallocated
 
     def combineDictationWords(self, fullResults):
         i = 0

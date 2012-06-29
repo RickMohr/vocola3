@@ -80,6 +80,7 @@ namespace Vocola
 
         static public void Stop()
         {
+            TheRecognizer.Exit();
 			if (TheWindowsHooks != null)
 				TheWindowsHooks.Stop();
             AutomationObjectGetter.Cleanup();

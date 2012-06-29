@@ -11,6 +11,7 @@ namespace Vocola
     {
         // Subclass responsibility
         public virtual void Initialize() {}
+        public virtual void Exit() {}
         public virtual bool SupportsDictation { get { return false; } }
 		public virtual bool RunDevelopmentVersionFromProgramFiles { get { return false; } }
 		public virtual void CommandFileChanged(LoadedFile loadedFile) { }
