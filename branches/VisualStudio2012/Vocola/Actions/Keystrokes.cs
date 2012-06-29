@@ -82,10 +82,10 @@ namespace Vocola
 
         static public void SendText(string text)
         {
-            StringBuilder sb = new StringBuilder();
+            Keystrokes1 ks = new Keystrokes1();
             foreach (Char c in text)
-                AppendCharForSendKeys(c, sb);
-            ReallySendKeys(sb.ToString());
+                ks.TheKeystrokes.Add(new Keystroke(c));
+            ks.SendKeys();
         }
 
         static public void SendTextUsingSeparateThread(string text)
@@ -104,6 +104,11 @@ namespace Vocola
 
         // ---------------------------------------------------------------------
         // Constructor -- convert "keys" string to keystroke objects
+
+        private Keystrokes1()
+        {
+            TheKeystrokes = new List<Keystroke>();
+        }
 
         private Keystrokes1(string keys)
         {
@@ -280,7 +285,8 @@ namespace Vocola
             foreach (Keystroke keystroke in TheKeystrokes)
             {
                 if ((keystroke.Char == (Char)0 && keystroke.KeyNameForSendKeys == null)
-                    || keystroke.Windows || !keystroke.Down || !keystroke.Up)
+                    || keystroke.Windows      // not supported by SendKeys
+                    || !keystroke.Down || !keystroke.Up)  // holding or releasing a key
                 {
                     // Can't use SendKeys for this keystroke.
                     // Send any accumulated keys and then use SendSystemKeys
@@ -305,6 +311,14 @@ namespace Vocola
         {
             if (k.Count == 0)
                 return;
+            if (k.Char == '+')
+            {
+                // Work around SendKeys glitch. To send '+' we must escape it, as '{+}', 
+                // but SendKeys sends that as numeric keypad "+", which toggles the Dragon mic!
+                // So we send "Shift =" instead. Will that fail on non-English systems?
+                k.Char = '=';
+                k.Shift = true;
+            }
             if (k.Shift)
                 sb.Append('+');
             if (k.Control)
@@ -729,3 +743,4 @@ namespace Vocola
     }
 
 }
+
