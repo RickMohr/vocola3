@@ -37,6 +37,8 @@ namespace Vocola
             try
             {
                 IntPtr hWnd = GetForegroundWindowHandle();
+                if (hWnd == IntPtr.Zero)
+                    return null;
                 Process process = Process.GetProcessById(GetWindowProcessID(hWnd));
                 int nChars = 1024;
                 StringBuilder filename = new StringBuilder(nChars);
