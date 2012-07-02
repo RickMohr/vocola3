@@ -722,6 +722,7 @@ class ThisGrammar(GrammarBase):
     def logSpokenCommand(self, fullResults):
         words = map(lambda t : t[0], fullResults)
         phrase = ' '.join(words)
+        self.vocolaConnector.LogMessage(3, unicode('-----------------------------------------'))
         self.vocolaConnector.LogMessage(1, 'Command: ' + unicode(phrase))
         if words == 1: print self.myFunc # hack to keep myFunc from being deallocated
 
