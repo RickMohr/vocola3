@@ -158,8 +158,6 @@ namespace Library
             try
             {
                 Process process = new Process();
-                process.EnableRaisingEvents = false;
-                process.StartInfo.UseShellExecute = true;
                 process.StartInfo.FileName = program;
                 process.StartInfo.Arguments = arguments;
                 process.StartInfo.WorkingDirectory = workingDirectory;

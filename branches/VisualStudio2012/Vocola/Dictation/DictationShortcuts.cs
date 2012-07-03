@@ -23,7 +23,7 @@ namespace Vocola
             ShortcutPairs = new SortableBindingList<ShortcutPair>();
 			WindowStatePersistor = new PersistWindowState();
 			WindowStatePersistor.Parent = this;
-			WindowStatePersistor.RegistryPath = Vocola.RegistryKeyName + @"\DictationShortcutsWindow"; // in HKEY_CURRENT_USER
+			WindowStatePersistor.RegistryPath = Options.RegistryKeyName + @"\DictationShortcutsWindow"; // in HKEY_CURRENT_USER
         }
 
         private class ShortcutPair

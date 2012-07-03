@@ -37,7 +37,7 @@ namespace Vocola
 			AppName = appName;
             ParentCommandSet = null;
             HasLanguageException = false;
-			MaxSequencedCommands = 1;// Vocola.MaxSequencedCommands;
+            MaxSequencedCommands = (Vocola.TheRecognizer.CommandSequencesEnabled ? Vocola.TheRecognizer.MaxSequencedCommands : 0);
             LoadedFile = loadedFile;
             if (loadedFile == null)
                 UniqueIdRoot = "__internal_";
@@ -494,7 +494,7 @@ namespace Vocola
                 if (loadedFile.ShouldActivateCommands())
                     loadedFile.CommandSet.Activate(this);
             }
-            if (Vocola.RequireControlNamePrefix)
+            if (OptionsSapi.RequireControlNamePrefix)
                 Vocola.SpokenControlNameCommandSet.Activate(this);
         }
 

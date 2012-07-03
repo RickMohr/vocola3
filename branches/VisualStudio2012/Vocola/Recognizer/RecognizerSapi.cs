@@ -36,7 +36,9 @@ namespace Vocola
 
         public override void Initialize()
         {
-            GrammarsFolder = Path.Combine(Vocola.AppDataFolder, "Grammars");
+            var appDataFolder = Application.LocalUserAppDataPath;
+            appDataFolder = appDataFolder.Substring(0, appDataFolder.IndexOf("Vocola") + 6);
+            GrammarsFolder = Path.Combine(appDataFolder, "WsrGrammars");
             ReadRegistry();
             TheRecognizer = new SpeechLib.SpSharedRecoContext();
             TheRecognizer.SoundStart += new _ISpeechRecoContextEvents_SoundStartEventHandler(SpeechDetected);
@@ -50,7 +52,9 @@ namespace Vocola
 
         static private void ReadRegistry()
         {
-            RegistryKey key = Registry.CurrentUser.CreateSubKey(Path.Combine(Vocola.RegistryKeyName, "SapiRecognizer"));
+            RegistryKey key = OptionsSapi.Key;
+
+            // Not settable via GUI, but present in case they need to be tweaked in the field
             Dictation.MaxAlternates = (uint)(int)key.GetValue("MaxCorrectionChoices", 20);
             NGlobalCommandDummies = (int)key.GetValue("NGlobalCommandDummies", 1000);
             StoreGrammarFiles = ((int)key.GetValue("StoreGrammarFiles", 0)) > 0;
@@ -66,6 +70,8 @@ namespace Vocola
         //public override bool RunDevelopmentVersionFromProgramFiles { get { return true; } }
 
 		public override bool SupportsDictation { get { return true; } }
+        public override bool CommandSequencesEnabled { get { return OptionsSapi.CommandSequencesEnabled; } }
+        public override int MaxSequencedCommands { get { return OptionsSapi.MaxSequencedCommands; } }
 
 		// ---------------------------------------------------------------------
         // Exit gracefully if WSR dies
@@ -198,7 +204,7 @@ namespace Vocola
             TheActiveCommands = new ActiveCommands(context);
             if (TheActiveCommands.Commands.Count > 0)
             {
-                bool enableCommandSequences = (Vocola.CommandSequencesEnabled && Vocola.MaxSequencedCommands > 1);
+                bool enableCommandSequences = (OptionsSapi.CommandSequencesEnabled && OptionsSapi.MaxSequencedCommands > 1);
                 Dictation.SetWeight(enableCommandSequences ? DictationWeightForCommandSequences : 0.9F); // If above .95 it trumps WSR dictation
                 SapiGrammar grammar = BuildGrammar(enableCommandSequences);
                 LoadGrammar(grammar, enableCommandSequences);
@@ -347,7 +353,7 @@ namespace Vocola
 
             // Allow a sequence of commands to be spoken
             SapiChoices sequenceChoices = new SapiChoices();
-            for (int n = 2; n <= Vocola.MaxSequencedCommands; n++)
+            for (int n = 2; n <= OptionsSapi.MaxSequencedCommands; n++)
             {
                 SapiSequence sequence = new SapiSequence();
                 for (int i = 1; i <=n; i++)

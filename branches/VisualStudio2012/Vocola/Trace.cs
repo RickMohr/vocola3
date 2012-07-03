@@ -52,7 +52,7 @@ namespace Vocola
             {
                 try
                 {
-                    using (StreamWriter sw = new StreamWriter(Path.Combine(Vocola.CommandFolder, @"..\Log.txt"), true /*append*/))
+                    using (StreamWriter sw = new StreamWriter(Path.Combine(Options.CommandFolder, @"..\Log.txt"), true /*append*/))
                         sw.WriteLine("{0}  {1}", DateTime.Now, message);
                     return;
                 }

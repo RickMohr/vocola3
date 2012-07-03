@@ -24,7 +24,7 @@ namespace Vocola
             ClassNames = new Dictionary<string, bool>();
             Methods = new Dictionary<string, List<MethodInfo>>();
             LoadFromFolder(Vocola.FunctionLibraryFolder);
-            LoadFromFolder(Vocola.ExtensionFolder);
+            LoadFromFolder(Options.ExtensionFolder);
         }
 
         private static void LoadFromFolder(string folderName)

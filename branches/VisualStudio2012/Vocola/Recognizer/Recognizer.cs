@@ -18,6 +18,8 @@ namespace Vocola
         public virtual void ContextChanged(VocolaContext context) { }
         public virtual void EmulateRecognize(string words) { }
         public virtual void DisplayMessage(string message, bool isWarning) {}
+        public virtual bool CommandSequencesEnabled { get { return false; } }
+        public virtual int MaxSequencedCommands { get { return 1; } }
 
         // ---------------------------------------------------------------------
         // Manage and access term alternates

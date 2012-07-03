@@ -326,8 +326,6 @@ namespace Library
         static private void LaunchFile(string filename)
         {
             Process process = new Process();
-            process.EnableRaisingEvents = false;
-            process.StartInfo.UseShellExecute = true;
             if (FilenameForOpenCommand == null)
                 process.StartInfo.FileName = filename;
             else

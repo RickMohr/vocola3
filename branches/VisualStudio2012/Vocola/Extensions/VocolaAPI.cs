@@ -12,7 +12,7 @@ namespace Vocola
 
         public string CommandFolder
         {
-            get { return Vocola.CommandFolder; }
+            get { return Options.CommandFolder; }
         }
 
         public string CommandBuiltinsFolder
@@ -27,7 +27,7 @@ namespace Vocola
 
         public string ExtensionFolder
         {
-            get { return Vocola.ExtensionFolder; }
+            get { return Options.ExtensionFolder; }
         }
 
         public VocolaErrorInfo FirstErrorInLastFile

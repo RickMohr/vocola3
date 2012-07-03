@@ -27,7 +27,6 @@ namespace Vocola
 
         private void ReadRegistry()
         {
-			RegistryKey key = Registry.CurrentUser.CreateSubKey(Path.Combine(Vocola.RegistryKeyName, "NatLinkRecognizer"));
         }
 
         private void CleanGrammarsFolder()
@@ -95,6 +94,9 @@ namespace Vocola
         {
             CleanGrammarsFolder();
         }
+
+        public override bool CommandSequencesEnabled { get { return OptionsNatLink.CommandSequencesEnabled; } }
+        public override int MaxSequencedCommands { get { return OptionsNatLink.MaxSequencedCommands; } }
 
         // ---------------------------------------------------------------------
         // Convert one Vocola command file to a NatLink grammar file
@@ -298,7 +300,7 @@ namespace Vocola
                 EmitLine(2, "{0} = <{1}>;", any, ruleNamesString);
             else
                 EmitLine(2, "{0} = <any_{1}>|<{2}>;", any, commandSet.ParentCommandSet.SequenceRuleNumber, ruleNamesString);
-			int nSeq = (Vocola.CommandSequencesEnabled ? commandSet.MaxSequencedCommands : 0);
+			int nSeq = commandSet.MaxSequencedCommands;
             EmitLine(2, "<sequence_{0}> exported = {1};",
                 commandSet.SequenceRuleNumber, GetRepeatGrammar(any, nSeq));
         }

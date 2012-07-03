@@ -21,7 +21,7 @@ namespace Vocola
             DictationWindowHandle = Win.GetForegroundWindowHandle();
 			WindowStatePersistor = new PersistWindowState();
 			WindowStatePersistor.Parent = this;
-			WindowStatePersistor.RegistryPath = Vocola.RegistryKeyName + @"\CorrectionWindow"; // in HKEY_CURRENT_USER
+			WindowStatePersistor.RegistryPath = Options.RegistryKeyName + @"\CorrectionWindow"; // in HKEY_CURRENT_USER
 
             txtPhrase.Text = Alternates.GetText(0);
             Show();

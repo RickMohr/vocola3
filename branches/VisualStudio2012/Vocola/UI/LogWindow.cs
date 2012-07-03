@@ -63,7 +63,7 @@ namespace Vocola
             {
                 TheLogWindow.WindowStatePersistor = new PersistWindowState();
                 TheLogWindow.WindowStatePersistor.Parent = TheLogWindow;
-                TheLogWindow.WindowStatePersistor.RegistryPath = Vocola.RegistryKeyName + @"\LogWindow"; // in HKEY_CURRENT_USER
+                TheLogWindow.WindowStatePersistor.RegistryPath = Options.RegistryKeyName + @"\LogWindow"; // in HKEY_CURRENT_USER
                 TheLogWindow.BeginInvoke((MethodInvoker) delegate()
                 {
                     if (activate || !TheLogWindow.Visible)
@@ -104,8 +104,7 @@ namespace Vocola
         private void ddlLogLevel_SelectedIndexChanged(object sender, EventArgs e)
         {
             Trace.LevelThreshold = (LogLevel)ddlLogLevel.SelectedIndex;
-			RegistryKey key = Registry.CurrentUser.CreateSubKey(Vocola.RegistryKeyName);
-			key.SetValue("LogLevel", (int)Trace.LevelThreshold);
+            Options.SaveLogLevel(Trace.LevelThreshold);
         }
 
         private void btnClear_Click(object sender, EventArgs e)

@@ -41,7 +41,7 @@ namespace Vocola
                         // Connect to server
                         TcpChannel channel = new TcpChannel();
                         ChannelServices.RegisterChannel(channel, true);
-                        string url = String.Format("tcp://127.0.0.1:{0}/AutomationObjectGetterServer", Vocola.AutomationObjectGetterPort);
+                        string url = String.Format("tcp://127.0.0.1:{0}/AutomationObjectGetterServer", Options.AutomationObjectGetterPort);
                         TheGetter = (IAutomationObjectGetter) Activator.GetObject(typeof(IAutomationObjectGetter), url);
                     }
                 }

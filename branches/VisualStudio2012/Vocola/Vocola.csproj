@@ -104,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actions\Keystrokes2.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="UI\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -140,11 +141,11 @@
       <DependentUpon>LogWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Parser\MyVocolaAnalyzer.cs" />
-    <Compile Include="UI\Options.cs">
+    <Compile Include="UI\OptionsWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Options.Designer.cs">
-      <DependentUpon>Options.cs</DependentUpon>
+    <Compile Include="UI\OptionsWindow.Designer.cs">
+      <DependentUpon>OptionsWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\PersistWindowState.cs">
       <SubType>Component</SubType>
@@ -182,9 +183,9 @@
       <SubType>Designer</SubType>
       <DependentUpon>LogWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\Options.resx">
+    <EmbeddedResource Include="UI\OptionsWindow.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>Options.cs</DependentUpon>
+      <DependentUpon>OptionsWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\TrayIcon.resx">
       <SubType>Designer</SubType>

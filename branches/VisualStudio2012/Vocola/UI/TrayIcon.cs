@@ -145,7 +145,7 @@ namespace Vocola
 
         public void ShowOptionsDialog()
         {
-            Options.ShowWindow();
+            OptionsWindow.ShowWindow();
         }
 
         public void ShowDictationShortcutsDialog()
@@ -161,8 +161,6 @@ namespace Vocola
         private void LaunchFile(string filename)
         {
             Process process = new Process();
-            process.EnableRaisingEvents = false;
-            process.StartInfo.UseShellExecute = true;
             process.StartInfo.FileName = filename;
             process.Start();
         }

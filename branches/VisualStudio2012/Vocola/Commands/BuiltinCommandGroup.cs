@@ -8,27 +8,17 @@ namespace Vocola
 
     class BuiltinCommandGroup
     {
-
 		public string Filename { get; private set; }
-        private string description;
-        private bool   enable;
+        public string Description { get; private set; }
+        public bool Include { get; set; }
+        public bool RequiresVocolaDictation { get; private set; }
 
-        public BuiltinCommandGroup(string filename, string description)
+        public BuiltinCommandGroup(string filename, bool requiresVocolaDictation, string description)
         {
-            this.Filename    = filename;
-            this.description = description;
-            enable = ((int)Key.GetValue("filename", 1)) > 0;
-        }
-
-        public string Description
-        {
-            get { return description; }
-        }
-
-        public bool Enable
-        {
-            get { return enable; }
-            set { enable = value; }
+            Filename = filename;
+            RequiresVocolaDictation = requiresVocolaDictation;
+            Description = description;
+            Include = ((int)Key.GetValue(filename, 1)) > 0;
         }
 
         // Static members to maintain list of groups
@@ -38,33 +28,37 @@ namespace Vocola
 
         public static void Initialize()
         {
-            Key = Registry.CurrentUser.CreateSubKey(Path.Combine(Vocola.RegistryKeyName, "BuiltinCommands"));
-            Groups = new List<BuiltinCommandGroup>();
-            Groups.Add(new BuiltinCommandGroup("_ui.vcl"         , "Vocola user interface - control it"));
-            Groups.Add(new BuiltinCommandGroup("_commandFile.vcl", "Command files - open them"));
-            Groups.Add(new BuiltinCommandGroup("_keys.vcl"       , "Writing commands - insert keystrokes with Vocola syntax"));
-			if (Vocola.TheRecognizer.SupportsDictation)
-			{
-				Groups.Add(new BuiltinCommandGroup("_dictation.vcl", "Dictation - modify dictated phrase"));
-				Groups.Add(new BuiltinCommandGroup("Vocola.vcl", "Vocola correction panel - choose alternatives"));
-			}
+            Key = Registry.CurrentUser.CreateSubKey(Path.Combine(Options.RegistryKeyName, "BuiltinCommands"));
+            Groups = GetGroups(Options.IsVocolaDictationEnabled);
 		}
 
-        public static bool IsDisabled(string filename)
+        public static List<BuiltinCommandGroup> GetGroups(bool isVocolaDictationEnabled)
+        {
+            var groups = new List<BuiltinCommandGroup>();
+            groups.Add(new BuiltinCommandGroup("_ui.vcl", false, "Vocola user interface - control it"));
+            groups.Add(new BuiltinCommandGroup("_commandFile.vcl", false, "Command files - open them"));
+            groups.Add(new BuiltinCommandGroup("_keys.vcl", false, "Writing commands - insert keystrokes with Vocola syntax"));
+            if (isVocolaDictationEnabled)
+            {
+                groups.Add(new BuiltinCommandGroup("_dictation.vcl", true, "Dictation - modify dictated phrase"));
+                groups.Add(new BuiltinCommandGroup("Vocola.vcl", true, "Vocola correction panel - choose alternatives"));
+            }
+            return groups;
+        }
+
+        public static bool IsExcluded(string filename)
         {
             foreach (BuiltinCommandGroup group in Groups)
                 if (filename == group.Filename)
-                    return !group.Enable;
-			// Unexpected builtin command file name
-			if (filename == "_dictation.vcl")
-				return true;
-			throw new InternalException("Unexpected builtin command file name");
+                    return !group.Include;
+            return true;
         }
 
-        public static void SaveToRegistry()
+        public static void UpdateAndSave()
         {
+            Initialize();
             foreach (BuiltinCommandGroup group in Groups)
-                Key.SetValue(group.Filename, group.Enable ? 1 : 0);
+                Key.SetValue(group.Filename, group.Include ? 1 : 0);
         }
 
     }

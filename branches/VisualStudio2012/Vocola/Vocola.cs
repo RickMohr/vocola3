@@ -1,4 +1,3 @@
-using Microsoft.Win32; // Registry
 using PerCederberg.Grammatica.Parser;
 using System;
 using System.Collections;
@@ -16,34 +15,21 @@ using System.Windows.Forms;
 namespace Vocola
 {
 
+    public enum RecognizerType { Wsr = 0, Dns }
+
     public class Vocola
     {
-        static public string Version = "3.2";
-        //static public Recognizer TheRecognizer = new RecognizerSapi();
-        static public Recognizer TheRecognizer = new RecognizerNatLink();
+        static public readonly string Version = "3.2";
+        static public Recognizer TheRecognizer { get; private set; }
         static private WindowsHooks TheWindowsHooks;
-        static public TrayIcon TrayIcon;
-        static public CommandSet SpokenControlNameCommandSet;
+        static public TrayIcon TrayIcon { get; private set; }
+        static public CommandSet SpokenControlNameCommandSet { get; private set; }
+        static public List<string> BaseUsingSet;
 
         // Important folders, derivable from startup path
-        static public string CommandSamplesFolder;
-        static public string CommandBuiltinsFolder;
-        static public string FunctionLibraryFolder;
-        static public string AppDataFolder;
-
-        // Global parameters (stored in registry)
-        static public string RegistryKeyName = @"Software\Vocola";
-        static public string RegistryKeyNameMicrosoft = @"Software\Microsoft\Speech\Preferences";
-        static public string CommandFolder;
-        static public string ExtensionFolder;
-        static public BaseUsingSetOption BaseUsingSetCode;
-        static public string CustomBaseUsingSet;
-        static public List<string> BaseUsingSet;
-        static public bool CommandSequencesEnabled;
-        static public int MaxSequencedCommands;
-        static public bool RequireControlNamePrefix;
-        static public bool DisableWsrDictationScratchpad;
-        static public int AutomationObjectGetterPort;
+        static public string CommandSamplesFolder { get; private set; }
+        static public string CommandBuiltinsFolder { get; private set; }
+        static public string FunctionLibraryFolder { get; private set; }
 
         [STAThread]
         static public void Main()
@@ -51,19 +37,19 @@ namespace Vocola
             try
             {
                 Thread.CurrentThread.Name = "Main UI Thread";
-                ReadRegistry();
+                Options.Load();
                 LogWindow.Create();
+                InitRecognizer(Options.TheRecognizerType);
                 SetFolderNames();
                 CreateDefaultUserFoldersIfNotYetChosen();
                 VocolaExtension.VocolaApi = new VocolaApi();
                 VocolaExtension.VocolaDictation = new VocolaDictation();
                 Extensions.Load();
-                InitializeBaseUsingSet(BaseUsingSetCode, CustomBaseUsingSet);
+                InitializeBaseUsingSet(Options.BaseUsingSetCode, Options.CustomBaseUsingSet);
                 Keystrokes.Initialize();
                 BuiltinCommandGroup.Initialize();
                 LoadInternalCommands();
                 TrayIcon = new TrayIcon();
-                TheRecognizer.Initialize();
                 LaunchGrammarUpdateThread();
                 WatchCommandFolder();
 				TheWindowsHooks = new WindowsHooks();
@@ -80,12 +66,36 @@ namespace Vocola
 
         static public void Stop()
         {
+            Cleanup();
+            System.Environment.Exit(0);
+        }
+
+        static public void Restart()
+        {
+            Cleanup();
+            var process = new Process();
+            process.StartInfo.FileName = Assembly.GetExecutingAssembly().Location;
+            process.Start();
+            System.Environment.Exit(0);
+        }
+
+        private static void Cleanup()
+        {
             TheRecognizer.Exit();
-			if (TheWindowsHooks != null)
-				TheWindowsHooks.Stop();
+            if (TheWindowsHooks != null)
+                TheWindowsHooks.Stop();
             AutomationObjectGetter.Cleanup();
             LogWindow.Destroy();
-            System.Environment.Exit(0);
+        }
+
+        static public void InitRecognizer(RecognizerType type)
+        {
+            switch (type)
+            {
+                case RecognizerType.Wsr: TheRecognizer = new RecognizerSapi(); break;
+                case RecognizerType.Dns: TheRecognizer = new RecognizerNatLink(); break;
+            }
+            TheRecognizer.Initialize();
         }
 
         static private void SetFolderNames()
@@ -113,34 +123,12 @@ namespace Vocola
                 CommandBuiltinsFolder = Path.Combine(vocolaInstallFolder, @"..\..\..\..\Commands\Builtins");
                 CommandSamplesFolder = Path.Combine(vocolaInstallFolder, @"..\..\..\..\Commands\Samples");
             }
-            AppDataFolder = Application.LocalUserAppDataPath;
-            AppDataFolder = AppDataFolder.Substring(0, AppDataFolder.IndexOf("Vocola") + 6);
-        }
-
-        static private void ReadRegistry()
-        {
-            RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryKeyName);
-            Trace.LevelThreshold = (LogLevel)(int)key.GetValue("LogLevel", (int)LogLevel.Error);//Low
-            Trace.ShowTimings = ((int)key.GetValue("ShowTimingInLogMessages", 0)) > 0;
-            Trace.ShouldLogToFile = ((int)key.GetValue("ShouldLogToFile", 0)) > 0;//1
-            CommandFolder = (string)key.GetValue("CommandFolderPath", null);
-            ExtensionFolder = (string)key.GetValue("ExtensionFolderPath", null);
-            BaseUsingSetCode = (BaseUsingSetOption)(int)key.GetValue("BaseUsingSetCode", (int)BaseUsingSetOption.Vocola3);
-            CustomBaseUsingSet = ((string)key.GetValue("CustomBaseUsingSet", "")).Replace(" ", "");
-            CommandSequencesEnabled = ((int)key.GetValue("UseCommandSequences", 0)) > 0;
-            MaxSequencedCommands = (int)key.GetValue("MaxSequencedCommands", 6);
-            RequireControlNamePrefix = ((int)key.GetValue("RequireControlNamePrefix", 0)) > 0;
-            AutomationObjectGetterPort = (int)key.GetValue("AutomationObjectGetterPort", 1649);
-
-            RegistryKey msKey = Registry.CurrentUser.CreateSubKey(RegistryKeyNameMicrosoft);
-            DisableWsrDictationScratchpad = ((int)msKey.GetValue("EnableDictationScratchpad", 0)) == 2;
         }
 
         static private void CreateDefaultUserFoldersIfNotYetChosen()
         {
-            RegistryKey mainRegistryKey = Registry.CurrentUser.CreateSubKey(RegistryKeyName);
             string defaultVocolaUserFolder = Path.Combine(Win.GetCurrentUserDocumentsFolder(), "Vocola3");
-            if (CommandFolder == null)
+            if (Options.CommandFolder == null)
             {
                 // Folder for user commands hasn't been chosen yet
                 string defaultCommandsFolder = Path.Combine(defaultVocolaUserFolder, "Commands");
@@ -159,10 +147,9 @@ namespace Vocola
                     }
                 }
                 // Folder for user commands will be the default folder
-                CommandFolder = defaultCommandsFolder;
-                mainRegistryKey.SetValue("CommandFolderPath", defaultCommandsFolder);
+                Options.CommandFolder = defaultCommandsFolder;
             }
-            if (ExtensionFolder == null)
+            if (Options.ExtensionFolder == null)
             {
                 // Folder for user extensions hasn't been chosen yet
                 string defaultExtensionsFolder = Path.Combine(defaultVocolaUserFolder, "Extensions");
@@ -181,9 +168,9 @@ namespace Vocola
                     }
                 }
                 // Folder for user extensions will be the default folder
-                ExtensionFolder = defaultExtensionsFolder;
-                mainRegistryKey.SetValue("ExtensionFolderPath", defaultExtensionsFolder);
+                Options.ExtensionFolder = defaultExtensionsFolder;
             }
+            Options.Save();
         }
 
         static public void InitializeBaseUsingSet(BaseUsingSetOption option, string customBaseUsingSet)
@@ -217,7 +204,7 @@ namespace Vocola
 
         private static void WatchCommandFolder()
         {
-            if (Directory.Exists(CommandFolder))
+            if (Directory.Exists(Options.CommandFolder))
             {
                 CreateWatcher("*.vcl");
                 CreateWatcher("*.vch");
@@ -227,7 +214,7 @@ namespace Vocola
         private static void CreateWatcher(string filter)
         {
             FileSystemWatcher watcher = new FileSystemWatcher();
-            watcher.Path = CommandFolder;
+            watcher.Path = Options.CommandFolder;
             watcher.IncludeSubdirectories = true;
             watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
             watcher.Filter = filter;
@@ -246,7 +233,7 @@ namespace Vocola
         static private void OnCommandFileDeleted(object source, FileSystemEventArgs e)
         {
             Trace.WriteLine(LogLevel.Low, "Command file '{0}' deleted", e.Name);
-            LoadedFile.LoadedFiles.Remove(Path.Combine(CommandFolder, e.Name));
+            LoadedFile.LoadedFiles.Remove(Path.Combine(Options.CommandFolder, e.Name));
             GrammarUpdateWaitHandle.Set();
         }
 
@@ -322,7 +309,7 @@ namespace Vocola
 
         static private bool UpdateCommands(VocolaContext context)
         {
-            bool changed = UpdateCommands(CommandFolder, context.AppName);
+            bool changed = UpdateCommands(Options.CommandFolder, context.AppName);
             changed = UpdateCommands(CommandBuiltinsFolder, context.AppName) || changed;
             return changed;
         }
@@ -561,9 +548,9 @@ namespace Vocola
 
         public bool ShouldActivateCommands()
         {
-            bool isDisabledBuiltinsFile = (IsBuiltinsFile && BuiltinCommandGroup.IsDisabled(Filename));
+            bool isExcludedBuiltinsFile = (IsBuiltinsFile && BuiltinCommandGroup.IsExcluded(Filename));
             bool hasCommands = (CommandSet != null && CommandSet.HasCommands);
-            return (hasCommands && !isDisabledBuiltinsFile);
+            return (hasCommands && !isExcludedBuiltinsFile);
         }
 
     }

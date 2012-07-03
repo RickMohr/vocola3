@@ -173,7 +173,7 @@ namespace Vocola
                 if (filename == includedFile.Filename)
                     throw new LanguageException(filenameNode, "Ignoring recursive include of file '{0}'", filename);
 
-            string pathname = Path.Combine(Vocola.CommandFolder, filename);
+            string pathname = Path.Combine(Options.CommandFolder, filename);
             if (!File.Exists(pathname)) 
                 throw new LanguageException(filenameNode, "Include file not found: '{0}'", filename);
 
