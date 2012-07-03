@@ -128,6 +128,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>REM copy "$(TargetPath)" "C:\Program Files\Vocola 3.1\FunctionLibrary\Bin"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "C:\Program Files (x86)\Vocola 3.2\FunctionLibrary\Bin"</PostBuildEvent>
   </PropertyGroup>
 </Project>

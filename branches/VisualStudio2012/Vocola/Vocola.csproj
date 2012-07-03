@@ -291,7 +291,7 @@
 REM Sign target executable
 REM "C:\Program Files\Microsoft Visual Studio 8\SDK\v2.0\Bin\signtool.exe" sign /f "$(ProjectDir)..\CodeSigning\Tucows.pfx" /p $igned /v /t http://timestamp.verisign.com/scripts/timestamp.dll "$(TargetPath)"
 
-REM copy /y "$(TargetDir)*.*" "C:\Program Files (x86)\Vocola 3.2\bin"
+copy /y "$(TargetDir)*.*" "C:\Program Files (x86)\Vocola 3.2\bin"
 </PostBuildEvent>
   </PropertyGroup>
 </Project>
