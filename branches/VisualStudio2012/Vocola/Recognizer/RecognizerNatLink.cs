@@ -95,6 +95,7 @@ namespace Vocola
             CleanGrammarsFolder();
         }
 
+        public override string Description { get { return "Dragon NaturallySpeaking (DNS), with NatLink"; } }
         public override bool CommandSequencesEnabled { get { return OptionsNatLink.CommandSequencesEnabled; } }
         public override int MaxSequencedCommands { get { return OptionsNatLink.MaxSequencedCommands; } }
 

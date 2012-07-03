@@ -39,6 +39,7 @@ namespace Vocola
                 Thread.CurrentThread.Name = "Main UI Thread";
                 Options.Load();
                 LogWindow.Create();
+                Trace.WriteLine(LogLevel.High, "Vocola {0} starting", Version);
                 InitRecognizer(Options.TheRecognizerType);
                 SetFolderNames();
                 CreateDefaultUserFoldersIfNotYetChosen();
@@ -95,6 +96,7 @@ namespace Vocola
                 case RecognizerType.Wsr: TheRecognizer = new RecognizerSapi(); break;
                 case RecognizerType.Dns: TheRecognizer = new RecognizerNatLink(); break;
             }
+            Trace.WriteLine(LogLevel.High, "Speech recognizer is {0}", TheRecognizer.Description);
             TheRecognizer.Initialize();
         }
 

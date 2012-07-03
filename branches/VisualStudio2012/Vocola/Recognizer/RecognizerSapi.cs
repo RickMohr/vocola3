@@ -69,7 +69,7 @@ namespace Vocola
 
         //public override bool RunDevelopmentVersionFromProgramFiles { get { return true; } }
 
-		public override bool SupportsDictation { get { return true; } }
+		public override string Description { get { return "Windows Speech Recognition (WSR)"; } }
         public override bool CommandSequencesEnabled { get { return OptionsSapi.CommandSequencesEnabled; } }
         public override int MaxSequencedCommands { get { return OptionsSapi.MaxSequencedCommands; } }
 
