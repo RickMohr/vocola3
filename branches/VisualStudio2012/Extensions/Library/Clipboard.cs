@@ -24,8 +24,11 @@ namespace Library
         [VocolaFunction]
         static public void ConvertToPlainText()
         {
-            if (HasData(DataFormats.Text))
-                SetText(GetPlainText());
+            RunAsSTAThread(() =>
+            {
+                if (HasData(DataFormats.Text))
+                    SetText(GetPlainText());
+            });
         }
 
         // ---------------------------------------------------------------------
@@ -49,10 +52,13 @@ namespace Library
         [CallEagerly(false)] // Support {Ctrl+c} Clipboard.GetText()
         static public string GetText()
         {
-            if (HasData(DataFormats.Text))
-                return GetPlainText();
-            else
-                return "";
+            string result = "";
+            RunAsSTAThread(() =>
+            {
+                if (HasData(DataFormats.Text))
+                    result = GetPlainText();
+            });
+            return result;
         }
 
         /// <summary>Copies text to the Windows clipboard.</summary>
@@ -69,7 +75,10 @@ namespace Library
         [ClearDictationStack(false)]
         static public void SetText(string text)
         {
-            System.Windows.Forms.Clipboard.SetDataObject(text, true);
+            RunAsSTAThread(() =>
+            {
+                System.Windows.Forms.Clipboard.SetDataObject(text, true);
+            });
         }
 
         static private bool HasData(string format)
@@ -85,6 +94,24 @@ namespace Library
         {
             Thread.Sleep(100); // allow a previous "copy" to finish
             return System.Windows.Forms.Clipboard.GetDataObject().GetData(DataFormats.Text).ToString();
+        }
+
+        // In the NatLink client, Vocola actions are invoked via .NET remoting so the calling thread is MTA (multi-threaded apartment state).
+        // The clipboard can only be accessed by a STA thread (single-threaded apartment state), so we use this utility from
+        // http://stackoverflow.com/questions/5944605/c-sharp-clipboard-gettext
+
+        static private void RunAsSTAThread(Action goForIt)
+        {
+            AutoResetEvent @event = new AutoResetEvent(false);
+            Thread thread = new Thread(
+                () =>
+                {
+                    goForIt();
+                    @event.Set();
+                });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            @event.WaitOne();
         }
 
     }
