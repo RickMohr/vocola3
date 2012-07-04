@@ -108,7 +108,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>REM copy /y "$(TargetDir)*.*" "C:\Users\Rick\Documents\Vocola3\Extensions"
+    <PostBuildEvent>copy /y "$(TargetDir)*.*" "C:\Users\Rick\Documents\Vocola3\Extensions"
 </PostBuildEvent>
   </PropertyGroup>
 </Project>
