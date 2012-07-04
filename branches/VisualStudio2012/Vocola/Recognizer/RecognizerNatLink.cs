@@ -12,21 +12,22 @@ namespace Vocola
 
     public class RecognizerNatLink : Recognizer
     {
-        private string GrammarsFolder = @"C:\Programs\NatLink\NatLink\MacroSystem";
+        private string GrammarsFolder;
         private string NatLinkConnectorDllPath = Path.Combine(Application.StartupPath, "NatLinkConnectorC.dll");
 		public DateTime LastGrammarUpdateTime { get; private set; }
 		public DateTime LastGrammarCreationTime { get; private set; }
 
         public override void Initialize()
         {
-            ReadRegistry();
-            CleanGrammarsFolder();
-			NatLinkListener.Start();
-			EmitVocolaMain();
-        }
-
-        private void ReadRegistry()
-        {
+            GrammarsFolder = Path.Combine(OptionsNatLink.NatLinkInstallFolder, @"NatLink\MacroSystem");
+            if (Directory.Exists(GrammarsFolder))
+            {
+                CleanGrammarsFolder();
+                NatLinkListener.Start();
+                EmitVocolaMain();
+            }
+            else
+                MessageBox.Show(String.Format("NatLink MacroSystem folder not found: '{0}'", GrammarsFolder));
         }
 
         private void CleanGrammarsFolder()

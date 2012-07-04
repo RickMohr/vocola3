@@ -505,7 +505,7 @@ namespace Vocola
             {
                 Trace.InitializeTimer();
                 Trace.WriteSeparator();
-                Trace.WriteLine(LogLevel.Low, "Speech detected");
+                //Trace.WriteLine(LogLevel.Low, "Speech detected");
                 //Trace.WriteLine(LogLevel.Low, "{0} active rules", TheRecognizer.Recognizer.Status.NumberOfActiveRules);
             }
         }
