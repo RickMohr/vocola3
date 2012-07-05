@@ -2,9 +2,11 @@ using System;
 using System.Diagnostics;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Remoting.Lifetime;
-using Microsoft.Win32; // RegistryKey
+using System.Runtime.Serialization.Formatters; // RegistryKey
+using Microsoft.Win32;
 
 namespace Vocola
 {
@@ -17,14 +19,16 @@ namespace Vocola
             try
             {
                 // Listen for requests
-                RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Vocola");
-                int port = (int)key.GetValue("AutomationObjectGetterPort", 1649);
-                TcpChannel channel = new TcpChannel(port);
-                ChannelServices.RegisterChannel(channel, true);
+
+                //RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Vocola");
+                //int port = (int)key.GetValue("AutomationObjectGetterPort", 1649);
+                //TcpChannel channel = new TcpChannel(port);
+                //ChannelServices.RegisterChannel(channel, true);
+                var prov = new BinaryServerFormatterSinkProvider() { TypeFilterLevel = TypeFilterLevel.Full };
+                var channel = new IpcServerChannel("AutomationObjectGetterChannel", "AutomationObjectGetterChannel", prov);
+                ChannelServices.RegisterChannel(channel, false);
                 RemotingConfiguration.RegisterWellKnownServiceType(
-                    typeof(AutomationObjectGetterServer),
-                    "AutomationObjectGetterServer",
-                    WellKnownObjectMode.Singleton);
+                    typeof(AutomationObjectGetterServer), "AutomationObjectGetterServer", WellKnownObjectMode.Singleton);
 
                 // Exit if Vocola process disappears
                 int vocolaProcessId = Int32.Parse(args[0]);

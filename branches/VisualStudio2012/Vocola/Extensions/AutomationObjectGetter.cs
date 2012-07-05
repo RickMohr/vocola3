@@ -5,6 +5,7 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.IO;
+using System.Threading;
 
 namespace Vocola
 {
@@ -31,19 +32,7 @@ namespace Vocola
                 lock (TheLock)
                 {
                     if (TheGetter == null)
-                    {
-                        // Start server process
-                        ServerProcess = new Process();
-                        ServerProcess.StartInfo.FileName = "VocolaAutomationObjectGetter.exe";
-                        ServerProcess.StartInfo.Arguments = Process.GetCurrentProcess().Id.ToString();
-                        ServerProcess.StartInfo.CreateNoWindow = true;
-                        ServerProcess.Start();
-                        // Connect to server
-                        TcpChannel channel = new TcpChannel();
-                        ChannelServices.RegisterChannel(channel, true);
-                        string url = String.Format("tcp://127.0.0.1:{0}/AutomationObjectGetterServer", Options.AutomationObjectGetterPort);
-                        TheGetter = (IAutomationObjectGetter) Activator.GetObject(typeof(IAutomationObjectGetter), url);
-                    }
+                        StartServer();
                 }
                 automationObject = TheGetter.GetAutomationObject(progId);
             }
@@ -52,6 +41,38 @@ namespace Vocola
                 Trace.WriteLine(LogLevel.Error, "Exception getting automation object '{0}':\n{1}", progId, ex.Message);
             }
             return automationObject;
+        }
+
+        private static void StartServer()
+        {
+            // Start server process
+            ServerProcess = new Process();
+            ServerProcess.StartInfo.FileName = "VocolaAutomationObjectGetter.exe";
+            ServerProcess.StartInfo.Arguments = Process.GetCurrentProcess().Id.ToString();
+            ServerProcess.StartInfo.CreateNoWindow = true;
+            ServerProcess.Start();
+            // Connect to server
+            //TcpChannel channel = new TcpChannel();
+            //ChannelServices.RegisterChannel(channel, true);
+            //string url = String.Format("tcp://127.0.0.1:{0}/AutomationObjectGetterServer", Options.AutomationObjectGetterPort);
+            string url = "ipc://AutomationObjectGetterChannel/AutomationObjectGetterServer";
+            Thread.Sleep(100);  // Wait for server to initialize
+            TheGetter = (IAutomationObjectGetter)Activator.GetObject(typeof(IAutomationObjectGetter), url);
+
+            //int nTries = 3;
+            //while (true)
+            //{
+            //    try
+            //    {
+            //        TheGetter = (IAutomationObjectGetter)Activator.GetObject(typeof(IAutomationObjectGetter), url);
+            //    }
+            //    catch (RemotingException)
+            //    {
+            //        if (nTries-- <= 0)
+            //            throw;
+            //        Thread.Sleep(100);  // Wait for server to initialize
+            //    }
+            //}
         }
 
         static public void Cleanup()
