@@ -1,0 +1,81 @@
+ %header%
+    DESCRIPTION = "Grammatica grammar for Vocola."
+    AUTHOR      = "Rick Mohr, <Rick at RickMohr dot net>"
+    VERSION     = "3.0"
+    DATE        = "28 July 2008"
+    LICENSE     = "Permission is granted to copy this document verbatim in any
+                   medium, provided that this copyright notice is left intact."
+    COPYRIGHT   = "Copyright (c) 2008-2012 Rick Mohr. All rights reserved."
+    GRAMMARTYPE = "LL"
+
+%tokens%
+    WHITESPACE      = <<[ \t\n\r]+>> %ignore%
+    NAME            = <<[a-zA-Z_]\w*>>
+    VARIABLE        = <<\<\w+\>>>
+    NAMEPAREN       = <<[a-zA-Z_]\w*\(>>
+    DOTTEDNAMEPAREN = <<([a-zA-Z_]\w*\.)*[a-zA-Z_]\w*\(>>
+    REFERENCE       = <<\$([a-zA-Z_]\w*|\d+)>>
+    RANGE           = <<\d+\.\.\d+>>
+	NUMBER          = <<\d+>>
+    CHARS           = <<[^"'#=;|\[\]()<>, \t\n\r]+>>
+    QUOTED_CHARS    = <<"([^"\n\r]|"")*"|'([^'\n\r]|'')*'>>
+    COMMENT_MULTI   = <<#\|(.|[\n\r])*?\|#>> %ignore%
+    COMMENT         = <<#.*>> %ignore%
+
+    EQUALS    = '='
+    ASSIGN    = ':='
+    STOP      = ';'
+    INCLUDE_T = '$include'
+    USING_T   = '$using'
+    IF_T      = '$if'
+    ELSEIF_T  = '$elseif'
+    ELSE_T    = '$else'
+    ENDIF_T   = '$end'
+    SET_T     = '$set'
+    MAXCMD_T  = 'MaximumCommands'
+    OR        = '|'
+    BRACKET_L = '['
+    BRACKET_R = ']'
+    PAREN_L   = '('
+    PAREN_R   = ')'
+    ANGLE_L   = '<'
+    ANGLE_R   = '>'
+    COMMA     = ','
+
+%productions%
+          file = [setmaxseq] using* statements ;
+     setmaxseq = '$set' 'MaximumCommands' NUMBER ';' ;
+         using = '$using' words ';' ;
+    statements = (include | context | definition | function | command)+ ;
+
+       include = '$include' actions ';' ;
+       context = '$if' ifbody ('$elseif' ifbody)* ['$else' statements] '$end' ;
+        ifbody = words ('|' words)* ';' statements ;
+
+    definition = VARIABLE ':=' menuBody ';' ;   // can have parentheses
+      function = prototype ':=' actions ';' ;
+     prototype = NAMEPAREN [NAME (',' NAME)*] ')' ;
+       command = terms '=' actions ';' ;
+
+         terms = (term | optionalWords)+ ;
+          term = words | VARIABLE | RANGE | menu ;
+ optionalWords = '[' words ']' ;
+
+          menu = '(' menuBody ')' ;
+      menuBody = alternative ('|' alternative)* ;
+   alternative = terms ['=' [actions] ] ;
+
+         words = word+ ;
+          word = (QUOTED_CHARS | NAME | NUMBER | CHARS) ;
+
+       actions = action+ ;
+        action = words | REFERENCE | call ;
+          call = (DOTTEDNAMEPAREN | NAMEPAREN) [actions (',' actions)*] ')' ;
+
+
+
+// java -jar "c:/Program Files/grammatica-1.4/lib/grammatica-1.4.jar" Vocola.grammar --debug
+// java -jar "c:/Program Files/grammatica-1.4/lib/grammatica-1.4.jar" Vocola.grammar --tokenize test.vcl
+// java -jar "c:/Program Files/grammatica-1.4/lib/grammatica-1.4.jar" Vocola.grammar --parse test.vcl
+// java -jar "c:/Program Files/grammatica-1.4/lib/grammatica-1.4.jar" Vocola.grammar --parse test.vcl > ../Notes/sampleParseTree 
+// java -jar "c:/Program Files/grammatica-1.4/lib/grammatica-1.4.jar" Vocola.grammar --csoutput Parser --csnamespace Vocola
