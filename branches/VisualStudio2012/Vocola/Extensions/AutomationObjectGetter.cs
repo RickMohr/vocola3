@@ -26,6 +26,7 @@ namespace Vocola
 
         static public object GetAutomationObject(string progId)
         {
+            //    return System.Runtime.InteropServices.Marshal.GetActiveObject(progId);
             object automationObject = null;
             try
             {
