@@ -1,7 +1,0 @@
-# Sample list of email address shortcuts
-
-<emailAddress> :=
-  ( MS Speech = ms-speech@yahoogroups.com
-  | Listen    = listen@microsoft.com
-  | Vocola    = vocola@vocola.net
-  );
