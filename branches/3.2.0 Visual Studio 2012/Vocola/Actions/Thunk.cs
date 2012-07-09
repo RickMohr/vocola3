@@ -22,25 +22,7 @@ namespace Vocola
             ArgumentAtoms = argumentAtoms;
         }
 
-        private bool ReturnsVoid { get { return (Method.ReturnType == typeof(void)); }}
-
-        public bool ShouldCallEagerly { get
-        {
-            // Return false if any argument is not a single string
-            // e.g. for:  {Ctrl+c} String.JoinWords( Clipboard.GetText(), ""));
-            foreach (Atoms a in ArgumentAtoms)
-                if (!a.IsSingleString())
-                    return false;
-
-            // Methods returning void - call is for side effects; evaluate lazily
-            // Methods returning a value - call is for value; evaluate eagerly
-            // Methods can override default by declaring [CallEagerly] attribute
-            bool shouldCallEagerly = !ReturnsVoid;
-            object[] attributes = Method.GetCustomAttributes(typeof(CallEagerly), false);
-            if (attributes.Length > 0)
-                shouldCallEagerly = (attributes[0] as CallEagerly).ShouldCallEagerly;
-            return shouldCallEagerly;
-        }}
+        public bool ReturnsVoid { get { return (Method.ReturnType == typeof(void)); }}
 
         // ---------------------------------------------------------------------
 
