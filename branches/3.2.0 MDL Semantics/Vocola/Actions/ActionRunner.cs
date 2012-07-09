@@ -107,8 +107,8 @@ namespace Vocola
         // Simplify actions by converting them to atoms (primitive actions):
         //     - Resolve references using environment
         //     - Unroll calls to user functions
+        //     - Evaluate If() predicates and choose branch
         //     - Execute calls to Eval()
-        //     - Execute calls to for-value native functions
 
         static public Atoms SimplifyActions(ArrayList actions, Dictionary<string, BoundValue> environment)
         {
@@ -189,11 +189,7 @@ namespace Vocola
                 foreach (ArrayList argumentActions in call.Arguments)
                     argumentAtoms.Add(SimplifyActions(argumentActions, environment));
 
-                Thunk thunk = new Thunk(call, argumentAtoms);
-                if (thunk.ShouldCallEagerly)
-                    atoms.Add(thunk.Execute());
-                else
-                    atoms.Add(thunk);
+                atoms.Add(new Thunk(call, argumentAtoms));
             }
             else
             {
@@ -235,7 +231,7 @@ namespace Vocola
     }
 
     // ---------------------------------------------------------------------
-    // Atoms are primitive actions -- keystrokes, native function calls (see Thunk class), and Repeat()
+    // Atoms are primitive actions -- strings, native function calls (see Thunk class), and Repeat()
 
     public class Atom {}
 
@@ -299,7 +295,13 @@ namespace Vocola
                 if (atom is string)
                     sb.Append(atom as string);
                 else if (atom is Thunk)
-                    sb.Append((atom as Thunk).Execute());
+                {
+                    var thunk = atom as Thunk;
+                    if (thunk.ReturnsVoid)
+                        throw new Exception("");
+                    else
+                        sb.Append(thunk.Execute());
+                }
                 else if (atom is RepeatAtom)
                 {
                     RepeatAtom repeatAtom = (atom as RepeatAtom);
@@ -312,24 +314,42 @@ namespace Vocola
 
         public void Run()
         {
+            var keystrokeBuffer = new StringBuilder();
+            Run(keystrokeBuffer);
+            if (keystrokeBuffer.Length > 0)
+                Keystrokes.SendKeys(keystrokeBuffer.ToString());
+        }
+
+        private void Run(StringBuilder keystrokeBuffer)
+        {
             foreach (object atom in AtomList)
             {
                 if (atom is string)
                 {
                     Dictation.Clear();  // Do this first so "Fix Space" will work after correction
-                    Keystrokes.SendKeys(atom as string);
+                    keystrokeBuffer.Append(atom as string);
                 }
                 else if (atom is Thunk)
                 {
-                    string result = (atom as Thunk).Execute();
-                    if (result != null && result != "")
-                        Keystrokes.SendKeys(result);
+                    var thunk = atom as Thunk;
+                    if (thunk.ReturnsVoid)
+                    {
+                        Keystrokes.SendKeys(keystrokeBuffer.ToString());
+                        keystrokeBuffer.Clear();
+                        thunk.Execute();
+                    }
+                    else
+                    {
+                        string result = thunk.Execute();
+                        if (result != null && result != "")
+                            keystrokeBuffer.Append(result);
+                    }
                 }
                 else if (atom is RepeatAtom)
                 {
                     RepeatAtom repeatAtom = (atom as RepeatAtom);
                     for (int i = 0; i < repeatAtom.Count; i++)
-                        repeatAtom.Atoms.Run();
+                        repeatAtom.Atoms.Run(keystrokeBuffer);
                 }
             }
         }
