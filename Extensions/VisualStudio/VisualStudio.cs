@@ -303,6 +303,12 @@ namespace Library
                         dte2 = null;
                         VocolaApi.LogMessage(LogLevel.Low, String.Format("Test failed: '{0}' ({1})", ex.Message, ex.GetType().FullName));
                         VocolaApi.LogMessage(LogLevel.Low, "Reestablishing connection to Visual Studio");
+                        //try
+                        //{
+                        //    // Haven't been able to eliminate "The pipe is being closed" exception, so just trap it
+                        //    dte2 = (DTE2)VocolaApi.GetAutomationObject("VisualStudio.DTE");
+                        //}
+                        //catch { }
                     }
                 }
 				if (dte2 == null)
