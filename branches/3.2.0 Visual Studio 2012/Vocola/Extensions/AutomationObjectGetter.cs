@@ -52,28 +52,14 @@ namespace Vocola
             ServerProcess.StartInfo.Arguments = Process.GetCurrentProcess().Id.ToString();
             ServerProcess.StartInfo.CreateNoWindow = true;
             ServerProcess.Start();
-            // Connect to server
-            //TcpChannel channel = new TcpChannel();
-            //ChannelServices.RegisterChannel(channel, true);
-            //string url = String.Format("tcp://127.0.0.1:{0}/AutomationObjectGetterServer", Options.AutomationObjectGetterPort);
-            string url = "ipc://AutomationObjectGetterChannel/AutomationObjectGetterServer";
-            Thread.Sleep(100);  // Wait for server to initialize
-            TheGetter = (IAutomationObjectGetter)Activator.GetObject(typeof(IAutomationObjectGetter), url);
 
-            //int nTries = 3;
-            //while (true)
-            //{
-            //    try
-            //    {
-            //        TheGetter = (IAutomationObjectGetter)Activator.GetObject(typeof(IAutomationObjectGetter), url);
-            //    }
-            //    catch (RemotingException)
-            //    {
-            //        if (nTries-- <= 0)
-            //            throw;
-            //        Thread.Sleep(100);  // Wait for server to initialize
-            //    }
-            //}
+            // Connect to server
+            TcpChannel channel = new TcpChannel();
+            ChannelServices.RegisterChannel(channel, true);
+            string url = String.Format("tcp://127.0.0.1:{0}/AutomationObjectGetterServer", Options.AutomationObjectGetterPort);
+            //string url = "ipc://AutomationObjectGetterChannel/AutomationObjectGetterServer";
+            //Thread.Sleep(100);  // Wait for server to initialize
+            TheGetter = (IAutomationObjectGetter)Activator.GetObject(typeof(IAutomationObjectGetter), url);
         }
 
         static public void Cleanup()
