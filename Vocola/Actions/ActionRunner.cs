@@ -231,7 +231,7 @@ namespace Vocola
     }
 
     // ---------------------------------------------------------------------
-    // Atoms are primitive actions -- strings, native function calls (see Thunk class), and Repeat()
+    // Atoms are primitive actions -- strings, native function calls (see Thunk class), and special forms Repeat() and If()
 
     public class Atom {}
 
@@ -312,14 +312,16 @@ namespace Vocola
             return sb.ToString();
         }
 
-        private static StringBuilder KeystrokeBuffer;
+        private static StringBuilder KeystrokeBuffer = new StringBuilder();
 
         public void Run()
         {
-            KeystrokeBuffer = new StringBuilder();
             ReallyRun();
             if (KeystrokeBuffer.Length > 0)
+            {
                 Keystrokes.SendKeys(KeystrokeBuffer.ToString());
+                KeystrokeBuffer.Clear();
+            }
         }
 
         private void ReallyRun()
