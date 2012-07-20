@@ -24,6 +24,28 @@ namespace Vocola
 
         public bool ReturnsVoid { get { return (Method.ReturnType == typeof(void)); }}
 
+        public bool ShouldFlushKeystrokesBeforeCall
+        {
+            get
+            {
+                // Methods returning void - call is for side effects; flush keystrokes before call
+                // Methods returning a value - call is for value; don't flush keystrokes before call
+                // Methods can override default by declaring [FlushKeystrokesBeforeCall] attribute
+                // (or, for legacy compatibility, the [CallEagerly] attribute)
+                bool shouldFlushKeystrokesBeforeCall = ReturnsVoid;
+                object[] attributes = Method.GetCustomAttributes(typeof(FlushKeystrokesBeforeCall), false);
+                if (attributes.Length > 0)
+                    shouldFlushKeystrokesBeforeCall = (attributes[0] as FlushKeystrokesBeforeCall).ShouldFlushKeystrokesBeforeCall;
+                else
+                {
+                    attributes = Method.GetCustomAttributes(typeof(CallEagerly), false);
+                    if (attributes.Length > 0)
+                        shouldFlushKeystrokesBeforeCall = ! (attributes[0] as CallEagerly).ShouldCallEagerly;
+                }
+                return shouldFlushKeystrokesBeforeCall;
+            }
+        }
+
         // ---------------------------------------------------------------------
 
         public string Execute()
