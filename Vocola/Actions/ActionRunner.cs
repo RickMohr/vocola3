@@ -231,7 +231,7 @@ namespace Vocola
     }
 
     // ---------------------------------------------------------------------
-    // Atoms are primitive actions -- strings, native function calls (see Thunk class), and special forms Repeat() and If()
+    // Atoms are primitive actions -- strings, native function calls (see Thunk class), and Repeat()
 
     public class Atom {}
 
@@ -297,10 +297,10 @@ namespace Vocola
                 else if (atom is Thunk)
                 {
                     var thunk = atom as Thunk;
-                    //if (thunk.ReturnsVoid)
-                    //    throw new ActionException(null, "attempt to call Unimacro or make a Dragon call in a functional context!");
-                    FlushKeystrokesIfNecessary(thunk);   // for e.g. {Ctrl+c} String.ToCamelCaseWord( Clipboard.GetText() );
-                    sb.Append(thunk.Execute());
+                    if (thunk.ReturnsVoid)
+                        throw new Exception("");
+                    else
+                        sb.Append(thunk.Execute());
                 }
                 else if (atom is RepeatAtom)
                 {
@@ -312,50 +312,45 @@ namespace Vocola
             return sb.ToString();
         }
 
-        private static StringBuilder KeystrokeBuffer = new StringBuilder();
-
         public void Run()
         {
-            ReallyRun();
-            if (KeystrokeBuffer.Length > 0)
-            {
-                Keystrokes.SendKeys(KeystrokeBuffer.ToString());
-                KeystrokeBuffer.Clear();
-            }
+            var keystrokeBuffer = new StringBuilder();
+            Run(keystrokeBuffer);
+            if (keystrokeBuffer.Length > 0)
+                Keystrokes.SendKeys(keystrokeBuffer.ToString());
         }
 
-        private void ReallyRun()
+        private void Run(StringBuilder keystrokeBuffer)
         {
             foreach (object atom in AtomList)
             {
                 if (atom is string)
                 {
                     Dictation.Clear();  // Do this first so "Fix Space" will work after correction
-                    KeystrokeBuffer.Append(atom as string);
+                    keystrokeBuffer.Append(atom as string);
                 }
                 else if (atom is Thunk)
                 {
                     var thunk = atom as Thunk;
-                    FlushKeystrokesIfNecessary(thunk);
-                    string result = thunk.Execute();
-                    if (result != null && result != "")
-                        KeystrokeBuffer.Append(result);
+                    if (thunk.ReturnsVoid)
+                    {
+                        Keystrokes.SendKeys(keystrokeBuffer.ToString());
+                        keystrokeBuffer.Clear();
+                        thunk.Execute();
+                    }
+                    else
+                    {
+                        string result = thunk.Execute();
+                        if (result != null && result != "")
+                            keystrokeBuffer.Append(result);
+                    }
                 }
                 else if (atom is RepeatAtom)
                 {
                     RepeatAtom repeatAtom = (atom as RepeatAtom);
                     for (int i = 0; i < repeatAtom.Count; i++)
-                        repeatAtom.Atoms.ReallyRun();
+                        repeatAtom.Atoms.Run(keystrokeBuffer);
                 }
-            }
-        }
-
-        private void FlushKeystrokesIfNecessary(Thunk thunk)
-        {
-            if (thunk.ShouldFlushKeystrokesBeforeCall && KeystrokeBuffer != null && KeystrokeBuffer.Length > 0)
-            {
-                Keystrokes.SendKeys(KeystrokeBuffer.ToString());
-                KeystrokeBuffer.Clear();
             }
         }
 

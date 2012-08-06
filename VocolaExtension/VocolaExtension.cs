@@ -38,16 +38,6 @@ namespace Vocola
         }
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
-    public class FlushKeystrokesBeforeCall : Attribute
-    {
-        public bool ShouldFlushKeystrokesBeforeCall;
-        public FlushKeystrokesBeforeCall(bool shouldFlushKeystrokesBeforeCall)
-        {
-            ShouldFlushKeystrokesBeforeCall = shouldFlushKeystrokesBeforeCall;
-        }
-    }
-
     public interface IVocolaApi
     {
         // Properties
