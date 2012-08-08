@@ -114,7 +114,7 @@ namespace Vocola
                     if (commandSet.ReferencesDictationVariable)
                         EmitDictationGrammar();
                     EmitSequenceRules(commandSet, 0);
-                    EmitFileMiddle(moduleName);
+                    EmitFileMiddle(commandSet, moduleName);
                     EmitActivations(commandSet, moduleName);
                     EmitTopCommandActions(commandSet);
                     EmitFileTrailer();
@@ -320,51 +320,95 @@ namespace Vocola
 
         private void EmitActivations(CommandSet commandSet, string moduleName)
         {
-			bool moduleHasPrefix = false;
-			string prefix = "";
-            Match match = Regex.Match(moduleName, "^(.+?)_.*");
-            if (match.Success)
-            {
-                prefix = match.Groups[1].Value;
-                moduleHasPrefix = true;
-            }
-            EmitLine(0, "");
-            EmitLine(1, "def gotBegin(self,moduleInfo):");
-			if (commandSet.IsGlobal)
-                EmitLine(2, "window = moduleInfo[2]");
-            else
-            {
-                EmitLine(2, "# Return if wrong application");
-                EmitLine(2, "window = matchWindow(moduleInfo,'{0}','')", moduleName);
-                if (moduleHasPrefix)
-                    EmitLine(2, "if not window: window = matchWindow(moduleInfo,'{0}','')", prefix);
-                EmitLine(2, "if not window: return None");
-            }
-            EmitLine(2, "self.firstWord = 0");
-            EmitLine(2, "# Return if same window and title as before");
-            EmitLine(2, "if moduleInfo == self.currentModule: return None");
-            EmitLine(2, "self.currentModule = moduleInfo");
-            EmitLine(0, "");
-            EmitLine(2, "self.deactivateAll()");
-			if (commandSet.Commands.Count > 0)
-			{
-				EmitLine(2, "try: self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1})'))",
-					moduleName, commandSet.Commands.Count);
-                EmitLine(2, "except: return");
-                if (commandSet.IsGlobal)
-					EmitLine(2, "self.activate('sequence_0')");
-				else
-					EmitLine(2, "self.activate('sequence_0', window)");
-			}
-            EmitLine(2, "title = string.lower(moduleInfo[1])");
+            EmitLine();
+            EmitLine(1, "def gotBegin(self, moduleInfo):");
 
-            // Emit code to activate the context's commands if one of the context
-            // strings matches the current window
-            EmitContextActivations(commandSet, 2);
-            EmitLine(0, "");
+			if (!commandSet.IsGlobal)
+            {
+                // For application-specific grammars, emit code to skip further processing if the application isn't active
+                string moduleNamePrefix = moduleName;
+                Match match = Regex.Match(moduleName, "^(.+?)_.*");
+                if (match.Success)
+                    moduleNamePrefix = match.Groups[1].Value;
+                EmitLine(2, "window = matchWindow(moduleInfo, '{0}', '')", moduleNamePrefix);
+                EmitLine(2, "if not window:");
+                EmitLine(2, "    # A different app is active -- no action needed");
+                EmitLine(2, "    return");
+                EmitLine();
+            }
+
+            EmitLine(2, "self.firstWord = 0");
+            EmitLine(2, "newTitle = string.lower(moduleInfo[1])");
+            EmitLine();
+
+            if (!commandSet.IsGlobal)
+            {
+                // For application-specific grammars, commands are activated for a specific window.
+                // If the app's window changes we need to re-activate commands for that window.
+                EmitLine(2, "if moduleInfo[2] != self.currentModule[2]:");
+                EmitLine(2, "    # A different window of this app is active -- deactivate all rules and re-activate for the new window");
+                EmitLine(2, "    self.deactivateAll()");
+                EmitPrimaryActivation(commandSet, moduleName, 3);
+                if (commandSet.ConditionalCommandSets.Count > 0)
+                    EmitLine(2, "    self.activateTitleSpecificCommands(newTitle)");
+                EmitLine();
+            }
+
+            if (commandSet.ConditionalCommandSets.Count > 0)
+            {
+                // If the window title changes, update title-specific command activations
+                EmitLine(2, "{0} moduleInfo[1] != self.currentModule[1]:", commandSet.IsGlobal ? "if" : "elif");
+                EmitLine(2, "    # Window title has changed -- adjust activation of title-specific rules");
+                EmitLine(2, "    oldTitle = string.lower(self.currentModule[1])");
+                EmitLine(2, "    self.activateTitleSpecificCommandsThatWereInactive(oldTitle, newTitle)");
+                EmitLine(2, "    self.deactivateTitleSpecificCommandsThatWereActive(oldTitle, newTitle)");
+                EmitLine();
+            }
+
+            EmitLine(2, "self.currentModule = moduleInfo");
+            EmitLine();
+            EmitLine();
+
+            EmitContextActivationMethods(commandSet);
         }
 
-        private void EmitContextActivations(CommandSet commandSet, int level)
+        private void EmitPrimaryActivation(CommandSet commandSet, string moduleName, int indent)
+        {
+            if (commandSet.Commands.Count > 0)
+            {
+                EmitLine(indent, "try: self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1})'))",
+                    moduleName, commandSet.Commands.Count);
+                EmitLine(indent, "except: return");
+                if (commandSet.IsGlobal)
+                    EmitLine(indent, "self.activate('sequence_0')");
+                else
+                    EmitLine(indent, "self.activate('sequence_0', window)");
+            }
+        }
+
+        private void EmitContextActivationMethods(CommandSet commandSet)
+        {
+            if (commandSet.ConditionalCommandSets.Count > 0)
+            {
+                if (!commandSet.IsGlobal)
+                {
+                    EmitLine(1, "def activateTitleSpecificCommands(self, title):");
+                    EmitContextActivations(commandSet, 2, EmitContextActivation);
+                    EmitLine();
+                }
+                EmitLine(1, "def activateTitleSpecificCommandsThatWereInactive(self, oldTitle, newTitle):");
+                EmitContextActivations(commandSet, 2, EmitConditionalContextActivation);
+                EmitLine();
+
+                EmitLine(1, "def deactivateTitleSpecificCommandsThatWereActive(self, oldTitle, newTitle):");
+                EmitContextActivations(commandSet, 2, EmitConditionalContextDeactivation);
+                EmitLine();
+            }
+        }
+
+        delegate void EmitContextActivationDelegate(CommandSet commandSet, string ifWord, int level);
+
+        private void EmitContextActivations(CommandSet commandSet, int level, EmitContextActivationDelegate emitActivation)
         {
             foreach (List<CommandSet> ifGroup in commandSet.ConditionalCommandSets)
             {
@@ -374,24 +418,59 @@ namespace Vocola
                     {
                         string ifWord = first ? "if" : cs.WindowTitlePatterns.Count > 0 ? "elif" : "else";
                         first = false;
-                        EmitContextActivation(cs, ifWord, level);
-                        EmitContextActivations(cs, level + 1);
+                        emitActivation(cs, ifWord, level);
+                        EmitLine();
+                        EmitContextActivations(cs, level + 1, emitActivation);
                     }
             }
         }
 
         private void EmitContextActivation(CommandSet commandSet, string ifWord, int level)
         {
+            string tests = GetPredicateForWindowTitlePatterns(commandSet, "title");
+            EmitLine(level, "{0} {1}:", ifWord, tests);
+            EmitLine(level, "    try: self.vocolaConnector.LogMessage(2, unicode('  Enabling {0} commands matching: {1}'))",
+                commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
+            EmitLine(level, "    except: return");
+            EmitLine(level, "    self.activate('sequence_{0}')", commandSet.SequenceRuleNumber);
+        }
+
+        private void EmitConditionalContextActivation(CommandSet commandSet, string ifWord, int level)
+        {
+            EmitLine(level, "{0} {1}:", ifWord, GetPredicateForWindowTitlePatterns(commandSet, "newTitle"));
+            EmitLine(level, "    if not ({0}):", GetPredicateForWindowTitlePatterns(commandSet, "oldTitle"));
+            EmitLine(level, "        try: self.vocolaConnector.LogMessage(2, unicode('  Enabling {0} commands matching: {1}'))",
+                commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
+            EmitLine(level, "        except: return");
+            EmitLine(level, "        self.activate('sequence_{0}')", commandSet.SequenceRuleNumber);
+        }
+
+        private void EmitConditionalContextDeactivation(CommandSet commandSet, string ifWord, int level)
+        {
+            EmitLine(level, "{0} {1}:", ifWord, GetPredicateForWindowTitlePatterns(commandSet, "oldTitle"));
+            EmitLine(level, "    if not ({0}):", GetPredicateForWindowTitlePatterns(commandSet, "newTitle"));
+            EmitLine(level, "        try: self.vocolaConnector.LogMessage(2, unicode('  Disabling {0} commands matching: {1}'))",
+                commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
+            EmitLine(level, "        except: return");
+            EmitLine(level, "        self.deactivate('sequence_{0}')", commandSet.SequenceRuleNumber);
+        }
+
+        private string GetPredicateForWindowTitlePatterns(CommandSet commandSet, string titleVariableName)
+        {
             ArrayList patterns = new ArrayList();
             foreach (string pattern in commandSet.WindowTitlePatterns)
-                patterns.Add(String.Format("string.find(title,{0}) >= 0", MakeQuotedString(pattern)));
+                patterns.Add(String.Format("string.find({0}, {1}) >= 0", titleVariableName, MakeQuotedString(pattern.ToLower())));
             string tests = String.Join(" or ", (string[])patterns.ToArray(typeof(string)));
-            EmitLine(level, "{0} {1}:", ifWord, tests);
-			if (commandSet.IsGlobal)
-				EmitLine(level, "    try: self.activate('sequence_{0}')", commandSet.SequenceRuleNumber);
-			else
-				EmitLine(level, "    try: self.activate('sequence_{0}', window)", commandSet.SequenceRuleNumber);
-            EmitLine(level, "    except BadWindow: pass");
+            return tests;
+        }
+
+        private string GetPrPredicateForWindowTitlePatterns(CommandSet commandSet, string titleVariableName)
+        {
+            ArrayList patterns = new ArrayList();
+            foreach (string pattern in commandSet.WindowTitlePatterns)
+                patterns.Add(String.Format("string.find({0}, {1}) >= 0", titleVariableName, MakeQuotedString(pattern.ToLower())));
+            string tests = String.Join(" or ", (string[])patterns.ToArray(typeof(string)));
+            return tests;
         }
 
         // ---------------------------------------------------------------------
@@ -444,7 +523,7 @@ namespace Vocola
             // all recognized words. Recurse!
             if (NoTermReferencesAVariable(terms))
                 EmitLine(2, "if len(words) > {0}: self.{1}(words[{0}:], fullResults)", nTerms, functionName);
-            EmitLine(0, "");
+            EmitLine();
         }
 
         private static bool IsAnythingTerm(object term)
@@ -609,6 +688,11 @@ namespace Vocola
             TheOutputStream.WriteLine(text, arguments);
         }
 
+        public void EmitLine()
+        {
+            TheOutputStream.WriteLine("");
+        }
+
         private string MakeQuotedString(string text)
         {
             text = text.Replace("\\", "\\\\"); // escape backslashes
@@ -703,19 +787,25 @@ class ThisGrammar(GrammarBase):
 ");
         }
 
-        private void EmitFileMiddle(string moduleName)
+        private void EmitFileMiddle(CommandSet commandSet, string moduleName)
         {
-            EmitLine(0, "");
-            EmitLine(0, "\"\"\"");
+            EmitLine(0, "\"\"\""); // close the grammar spec
+            EmitLine();
             EmitLine(1, "def initialize(self):");
 			EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
 			EmitLine(2, "connected = self.vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
 			EmitLine(2, "if connected == 0: return");
-			EmitLine(2, "#print 'Loading Vocola commands for {0}'", moduleName);
-			Emit(@"
-        self.load(self.gramSpec)
-        self.currentModule = ("","",0)
-");
+            EmitLine();
+            EmitLine(2, "print 'Loading Vocola commands for {0}'", moduleName);
+            EmitLine(2, "self.load(self.gramSpec)");
+            EmitLine(2, "self.currentModule = ('', '', 0)");
+            if (commandSet.IsGlobal)
+            {
+                EmitLine();
+                EmitLine(2, "# Activate global commands. (They will remain active until the grammar is unloaded.)");
+                EmitPrimaryActivation(commandSet, moduleName, 2);
+            }
+            EmitLine();
         }
 
         private void EmitFileTrailer()
