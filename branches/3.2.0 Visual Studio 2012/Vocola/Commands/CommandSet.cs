@@ -352,7 +352,7 @@ namespace Vocola
                 }
                 else
                 {
-                    string patterns = String.Format("'{0}'", String.Join(" | ", (string[])WindowTitlePatterns.ToArray(typeof(String))));
+                    string patterns = String.Format("'{0}'", WindowTitlePatternsAsString);
                     if (patterns == "''")
                         patterns = "$else";
                     Trace.WriteLine(LogLevel.Medium, "{0}Context: {1} ({2})", indent, patterns, nCommands);
@@ -456,7 +456,7 @@ namespace Vocola
                 bool first = false;
                 foreach (CommandSet cs in ifGroup)
                 {
-                    string context = String.Join("|", (string[])cs.WindowTitlePatterns.ToArray(typeof(String)));
+                    string context = WindowTitlePatternsAsString;
                     if (first)
                     {
                         Debug.WriteLine("$if " + context + ";");
@@ -473,6 +473,9 @@ namespace Vocola
                 }
             }
         }
+
+        public string WindowTitlePatternsAsString 
+        { get { return String.Join(" | ", (string[])WindowTitlePatterns.ToArray(typeof(String))); } }
 
     }
 
