@@ -77,7 +77,7 @@ namespace Vocola
 
         public void SendKeys(string keys)
         {
-            Keystrokes.SendKeys(keys);
+            Vocola.KeySender.SendKeys(keys);
         }
 
         public void SetVariable(string name, string value)
@@ -87,12 +87,12 @@ namespace Vocola
 
         public void SendSystemKeys(string keys)
         {
-            Keystrokes.SendSystemKeys(keys);
+            Vocola.KeySender.SendSystemKeys(keys);
         }
 
         public void InsertText(string text)
         {
-            Keystrokes.SendText(text);
+            Vocola.KeySender.SendText(text);
         }
 
         public void ShowFunctionLibraryDocumentation()

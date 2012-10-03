@@ -21,6 +21,7 @@ namespace Vocola
     {
         static public readonly string Version = "3.2";
         static public Recognizer TheRecognizer { get; private set; }
+        static public KeystrokeSender KeySender { get; private set; }
         static private WindowsHooks TheWindowsHooks;
         static public TrayIcon TrayIcon { get; private set; }
         static public CommandSet SpokenControlNameCommandSet { get; private set; }
@@ -47,7 +48,7 @@ namespace Vocola
                 VocolaExtension.VocolaDictation = new VocolaDictation();
                 Extensions.Load();
                 InitializeBaseUsingSet(Options.BaseUsingSetCode, Options.CustomBaseUsingSet);
-                Keystrokes.Initialize();
+                KeySender = new KeystrokeSenderWinForms();
                 BuiltinCommandGroup.Initialize();
                 LoadInternalCommands();
                 TrayIcon = new TrayIcon();

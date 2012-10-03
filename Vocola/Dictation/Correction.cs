@@ -75,7 +75,7 @@ namespace Vocola
                     if (Win.SetForegroundWindowHandle(DictationWindowHandle))
                     {
                         string backspaces = "{BACKSPACE " + oldText.Length.ToString() + "}";
-                        Keystrokes.SendKeys(backspaces);
+                        Vocola.KeySender.SendKeys(backspaces);
                         Dictation.Clear();
                         Dictation.HandleDictatedPhrase(newText, null);
                     }
