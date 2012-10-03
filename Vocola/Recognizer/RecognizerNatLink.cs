@@ -740,8 +740,9 @@ class ThisGrammar(GrammarBase):
 				EmitLine(2, "print 'Vocola {0} is running'", Vocola.Version);
 				Emit(@"
         MYFUNCTYPE = CFUNCTYPE(c_int, c_wchar_p)
-        self.myFunc = MYFUNCTYPE(emulateRecognize)
-        vocolaConnector.SetCallbacks(self.myFunc)
+        self.emulateRecognizeFunc = MYFUNCTYPE(emulateRecognize)
+        self.sendKeysFunc = MYFUNCTYPE(sendKeys)
+        vocolaConnector.SetCallbacks(self.emulateRecognizeFunc, self.sendKeysFunc)
 
 # When speech is heard, vocolaBeginCallback is called (from natlinkmain) before any others.
 # Return values indicate whether Vocola has changed any .py files since the last call:
@@ -762,6 +763,11 @@ def vocolaBeginCallback(moduleInfo):
 
 def emulateRecognize(words):
     try: natlink.recognitionMimic(words.encode('ascii','replace').split(' '))
+    except: return -1
+    return 0
+
+def sendKeys(keys):
+    try: natlink.playString(keys.encode('ascii','replace'))
     except: return -1
     return 0
 

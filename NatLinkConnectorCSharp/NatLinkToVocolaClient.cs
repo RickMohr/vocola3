@@ -101,11 +101,21 @@ namespace Vocola
 
 		public bool EmulateRecognize(string words)
 		{
-			CallbackThunk = () => NatLinkEmulateRecognize(words);
-			CallbackRequestWaitHandle.Set();
-			CallbackDoneWaitHandle.WaitOne();
-			return CallbackSucceeded;
+            return DoCallback( () => NatLinkEmulateRecognize(words) );
 		}
+
+        public bool SendKeys(string keys)
+        {
+            return DoCallback( () => NatLinkSendKeys(keys) );
+        }
+
+        private bool DoCallback(CallbackDelegate thunk)
+        {
+            CallbackThunk = thunk;
+            CallbackRequestWaitHandle.Set();
+            CallbackDoneWaitHandle.WaitOne();
+            return CallbackSucceeded;
+        }
 
 		public void ActionsDone()
 		{
@@ -117,6 +127,9 @@ namespace Vocola
 
 		[DllImport("NatLinkConnectorC.dll", CharSet=CharSet.Unicode)]
 		private static extern int NatLinkEmulateRecognize(string words);
+
+        [DllImport("NatLinkConnectorC.dll", CharSet = CharSet.Unicode)]
+        private static extern int NatLinkSendKeys(string keys);
 
 	}
 

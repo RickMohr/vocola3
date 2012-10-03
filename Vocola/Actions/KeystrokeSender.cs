@@ -216,5 +216,52 @@ namespace Vocola
 
     }
 
+    // ------------------------------------------------------------------------
+    // Subclass to send keystrokes using NatSpeak SendDragonKeys
+
+    public class KeystrokeSenderDragon : KeystrokeSender
+    {
+
+        protected override void AppendKeystrokeForSendKeys(Keystroke k, StringBuilder sb)
+        {
+            if (k.Count == 0)
+                return;
+            bool useBraces = ((k.Count > 1 && k.Char != ' ')
+                              || k.KeyNameForSendKeys != null
+                              || k.HasModifierKey());
+            if (useBraces)
+                sb.Append('{');
+            if (k.Control)
+                sb.Append("Ctrl+");
+            if (k.Alternate)
+                sb.Append("Alt+");
+            if (k.Shift)
+                sb.Append("Shift+");
+            if (k.KeyNameForSendKeys != null)
+                sb.Append(k.KeyNameForSendKeys);
+            else if (k.Char == '\n')
+                sb.Append("ENTER");
+            else
+                sb.Append(k.Char);
+            if (k.Count > 1)
+                if (k.Char == ' ')
+                    // SendKeys doesn't seem to support multiple spaces ("{  4}" fails)
+                    sb.Append("".PadLeft((int)k.Count - 1));
+                else
+                    sb.Append(String.Format(" {0}", k.Count));
+            if (useBraces)
+                sb.Append('}');
+        }
+
+        protected override void ReallySendKeys(string keys)
+        {
+            Trace.WriteLine(LogLevel.Low, "    Keystrokes: '{0}'", keys);
+            bool success = NatLinkToVocolaServer.CurrentNatLinkCallbackHandler.SendKeys(keys);
+            if (!success)
+                Trace.WriteLine(LogLevel.Error, "Failed to send keystrokes via SendDragonKeys");
+        }
+
+    }
+
 }
 
