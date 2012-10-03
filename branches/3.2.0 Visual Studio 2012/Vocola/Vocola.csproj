@@ -167,7 +167,7 @@
       <DependentUpon>TrayIcon.cs</DependentUpon>
     </Compile>
     <Compile Include="WindowsHooks.cs" />
-    <Compile Include="Actions\Keystrokes.cs" />
+    <Compile Include="Actions\KeystrokeSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="UI\AboutBox.resx">
       <SubType>Designer</SubType>
