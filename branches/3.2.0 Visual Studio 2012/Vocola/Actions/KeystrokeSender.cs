@@ -217,7 +217,7 @@ namespace Vocola
     }
 
     // ------------------------------------------------------------------------
-    // Subclass to send keystrokes using NatSpeak SendDragonKeys
+    // Subclass to send keystrokes using NatLink playString()
 
     public class KeystrokeSenderDragon : KeystrokeSender
     {
@@ -258,7 +258,7 @@ namespace Vocola
             Trace.WriteLine(LogLevel.Low, "    Keystrokes: '{0}'", keys);
             bool success = NatLinkToVocolaServer.CurrentNatLinkCallbackHandler.SendKeys(keys);
             if (!success)
-                Trace.WriteLine(LogLevel.Error, "Failed to send keystrokes via SendDragonKeys");
+                Trace.WriteLine(LogLevel.Error, "Failed to send keystrokes via NatLink");
         }
 
     }
