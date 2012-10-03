@@ -317,7 +317,7 @@ namespace Vocola
             var keystrokeBuffer = new StringBuilder();
             Run(keystrokeBuffer);
             if (keystrokeBuffer.Length > 0)
-                Keystrokes.SendKeys(keystrokeBuffer.ToString());
+                Vocola.KeySender.SendKeys(keystrokeBuffer.ToString());
         }
 
         private void Run(StringBuilder keystrokeBuffer)
@@ -334,7 +334,7 @@ namespace Vocola
                     var thunk = atom as Thunk;
                     if (thunk.ReturnsVoid)
                     {
-                        Keystrokes.SendKeys(keystrokeBuffer.ToString());
+                        Vocola.KeySender.SendKeys(keystrokeBuffer.ToString());
                         keystrokeBuffer.Clear();
                         thunk.Execute();
                     }

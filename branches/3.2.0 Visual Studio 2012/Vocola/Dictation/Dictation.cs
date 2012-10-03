@@ -98,7 +98,7 @@ namespace Vocola
                                 text = "  " + text;
                         }
                     }
-                    Keystrokes.SendTextUsingSeparateThread(text);
+                    Vocola.KeySender.SendTextUsingSeparateThread(text);
                     SapiAlternates alternates = 
                         (result == null) ? new SapiAlternates(text)
                                          : new SapiAlternates(result, capitalizeAlternates);

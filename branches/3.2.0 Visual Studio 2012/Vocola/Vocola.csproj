@@ -103,6 +103,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actions\Keystroke.cs" />
+    <Compile Include="Actions\KeystrokeParser.cs" />
     <Compile Include="Actions\Keystrokes2.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="UI\AboutBox.cs">
