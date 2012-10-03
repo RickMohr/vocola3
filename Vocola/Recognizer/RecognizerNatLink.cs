@@ -348,7 +348,7 @@ namespace Vocola
                 EmitLine(2, "if moduleInfo[2] != self.currentModule[2]:");
                 EmitLine(2, "    # A different window of this app is active -- deactivate all rules and re-activate for the new window");
                 EmitLine(2, "    self.deactivateAll()");
-                EmitPrimaryActivation(commandSet, moduleName, 3);
+                EmitPrimaryActivation(commandSet, moduleName);
                 if (commandSet.ConditionalCommandSets.Count > 0)
                     EmitLine(2, "    self.activateTitleSpecificCommands(newTitle)");
                 EmitLine();
@@ -372,17 +372,26 @@ namespace Vocola
             EmitContextActivationMethods(commandSet);
         }
 
-        private void EmitPrimaryActivation(CommandSet commandSet, string moduleName, int indent)
+        private void EmitPrimaryActivation(CommandSet commandSet, string moduleName)
         {
             if (commandSet.Commands.Count > 0)
             {
-                EmitLine(indent, "try: self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1})'))",
+                //EmitLine(indent, "try: self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1})'))",
+                EmitLine(3, "try: self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1}) for window ' + str(window)))",
                     moduleName, commandSet.Commands.Count);
-                EmitLine(indent, "except: return");
-                if (commandSet.IsGlobal)
-                    EmitLine(indent, "self.activate('sequence_0')");
-                else
-                    EmitLine(indent, "self.activate('sequence_0', window)");
+                EmitLine(3, "except: return");
+                EmitLine(3, "self.activate('sequence_0', window)");
+            }
+        }
+
+        private void EmitPrimaryActivationGlobal(CommandSet commandSet, string moduleName)
+        {
+            if (commandSet.Commands.Count > 0)
+            {
+                EmitLine(2, "try: self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1})'))",
+                    moduleName, commandSet.Commands.Count);
+                EmitLine(2, "except: return");
+                EmitLine(2, "self.activate('sequence_0')");
             }
         }
 
@@ -802,8 +811,8 @@ class ThisGrammar(GrammarBase):
             if (commandSet.IsGlobal)
             {
                 EmitLine();
-                EmitLine(2, "# Activate global commands. (They will remain active until the grammar is unloaded.)");
-                EmitPrimaryActivation(commandSet, moduleName, 2);
+                EmitLine(2, "# Activate global commands. (They will remain active until the grammar is loaded.)");
+                EmitPrimaryActivationGlobal(commandSet, moduleName);
             }
             EmitLine();
         }
