@@ -14,6 +14,7 @@ using namespace System::Windows::Forms;
 static bool Initialized = false;
 static wchar_t VocolaExecutionFolder[1000];
 static int (*fpEmulateRecognize)(const wchar_t* words);
+static int (*fpSendKeys)(const wchar_t* keys);
 
 Assembly^ CurrentDomain_AssemblyResolve(Object^ sender, ResolveEventArgs^ args)
 {
@@ -72,9 +73,12 @@ extern "C"
 		}
 	}
 
-	void __declspec(dllexport) __stdcall SetCallbacks(int (*fpNatLinkEmulateRecognize)(const wchar_t* words))
+	void __declspec(dllexport) __stdcall SetCallbacks(
+		int (*fpNatLinkEmulateRecognize)(const wchar_t* words),
+		int (*fpNatLinkSendKeys)(const wchar_t* keys))
 	{
 		fpEmulateRecognize = fpNatLinkEmulateRecognize;
+		fpSendKeys = fpNatLinkSendKeys;
 	}
 
 	// NatLink to Vocola
@@ -99,5 +103,10 @@ extern "C"
 	int __declspec(dllexport) NatLinkEmulateRecognize(const wchar_t* words)
 	{
 		return fpEmulateRecognize(words);
+	}
+
+	int __declspec(dllexport) NatLinkSendKeys(const wchar_t* keys)
+	{
+		return fpSendKeys(keys);
 	}
 }

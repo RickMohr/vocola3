@@ -48,7 +48,7 @@ namespace Vocola
                 VocolaExtension.VocolaDictation = new VocolaDictation();
                 Extensions.Load();
                 InitializeBaseUsingSet(Options.BaseUsingSetCode, Options.CustomBaseUsingSet);
-                KeySender = new KeystrokeSenderWinForms();
+                KeySender = new KeystrokeSenderDragon();
                 BuiltinCommandGroup.Initialize();
                 LoadInternalCommands();
                 TrayIcon = new TrayIcon();
