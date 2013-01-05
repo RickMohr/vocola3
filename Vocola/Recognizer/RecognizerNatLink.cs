@@ -301,8 +301,8 @@ namespace Vocola
             if (commandSet.IsTopLevel || commandSet.ParentCommandSet.Commands.Count == 0)
                 EmitLine(2, "{0} = <{1}>;", any, ruleNamesString);
             else
-                EmitLine(2, "{0} = <any_{1}>|<{2}>;", any, commandSet.ParentCommandSet.SequenceRuleNumber, ruleNamesString);
-			int nSeq = commandSet.MaxSequencedCommands;
+                EmitLine(2, "{0} = <{2}>|<any_{1}>;", any, commandSet.ParentCommandSet.SequenceRuleNumber, ruleNamesString);
+            int nSeq = commandSet.MaxSequencedCommands;
             EmitLine(2, "<sequence_{0}> exported = {1};",
                 commandSet.SequenceRuleNumber, GetRepeatGrammar(any, nSeq));
         }
@@ -336,7 +336,7 @@ namespace Vocola
                 EmitLine(2, "    return");
                 EmitLine();
             }
-
+            
             EmitLine(2, "self.firstWord = 0");
             EmitLine(2, "newTitle = string.lower(moduleInfo[1])");
             EmitLine();
@@ -348,9 +348,9 @@ namespace Vocola
                 EmitLine(2, "if moduleInfo[2] != self.currentModule[2]:");
                 EmitLine(2, "    # A different window of this app is active -- deactivate all rules and re-activate for the new window");
                 EmitLine(2, "    self.deactivateAll()");
-                EmitPrimaryActivation(commandSet, moduleName);
                 if (commandSet.ConditionalCommandSets.Count > 0)
-                    EmitLine(2, "    self.activateTitleSpecificCommands(newTitle)");
+                    EmitLine(2, "    self.activateTitleSpecificCommands(newTitle, window)");
+                EmitPrimaryActivation(commandSet, moduleName);
                 EmitLine();
             }
 
@@ -360,7 +360,7 @@ namespace Vocola
                 EmitLine(2, "{0} moduleInfo[1] != self.currentModule[1]:", commandSet.IsGlobal ? "if" : "elif");
                 EmitLine(2, "    # Window title has changed -- adjust activation of title-specific rules");
                 EmitLine(2, "    oldTitle = string.lower(self.currentModule[1])");
-                EmitLine(2, "    self.activateTitleSpecificCommandsThatWereInactive(oldTitle, newTitle)");
+                EmitLine(2, "    self.activateTitleSpecificCommandsThatWereInactive(oldTitle, newTitle{0})", commandSet.IsGlobal ? "" : ", window");
                 EmitLine(2, "    self.deactivateTitleSpecificCommandsThatWereActive(oldTitle, newTitle)");
                 EmitLine();
             }
@@ -401,11 +401,11 @@ namespace Vocola
             {
                 if (!commandSet.IsGlobal)
                 {
-                    EmitLine(1, "def activateTitleSpecificCommands(self, title):");
+                    EmitLine(1, "def activateTitleSpecificCommands(self, title, window):");
                     EmitContextActivations(commandSet, 2, EmitContextActivation);
                     EmitLine();
                 }
-                EmitLine(1, "def activateTitleSpecificCommandsThatWereInactive(self, oldTitle, newTitle):");
+                EmitLine(1, "def activateTitleSpecificCommandsThatWereInactive(self, oldTitle, newTitle{0}):", commandSet.IsGlobal ? "" : ", window");
                 EmitContextActivations(commandSet, 2, EmitConditionalContextActivation);
                 EmitLine();
 
@@ -441,7 +441,7 @@ namespace Vocola
             EmitLine(level, "    try: self.vocolaConnector.LogMessage(2, unicode('  Enabling {0} commands matching: {1}'))",
                 commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
             EmitLine(level, "    except: return");
-            EmitLine(level, "    self.activate('sequence_{0}')", commandSet.SequenceRuleNumber);
+            EmitLine(level, "    self.activate('sequence_{0}', window)", commandSet.SequenceRuleNumber);
         }
 
         private void EmitConditionalContextActivation(CommandSet commandSet, string ifWord, int level)
@@ -451,7 +451,7 @@ namespace Vocola
             EmitLine(level, "        try: self.vocolaConnector.LogMessage(2, unicode('  Enabling {0} commands matching: {1}'))",
                 commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
             EmitLine(level, "        except: return");
-            EmitLine(level, "        self.activate('sequence_{0}')", commandSet.SequenceRuleNumber);
+            EmitLine(level, "        self.activate('sequence_{0}'{1})", commandSet.SequenceRuleNumber, commandSet.IsGlobal ? "" : ", window");
         }
 
         private void EmitConditionalContextDeactivation(CommandSet commandSet, string ifWord, int level)
