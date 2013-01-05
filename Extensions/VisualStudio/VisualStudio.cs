@@ -312,18 +312,25 @@ namespace Library
                     }
                 }
 				if (dte2 == null)
-					dte2 = (DTE2)VocolaApi.GetAutomationObject("VisualStudio.DTE");
+					dte2 = GetAutomationObject("VisualStudio.DTE");
 				if (dte2 == null)
-					dte2 = (DTE2)VocolaApi.GetAutomationObject("VisualStudio.DTE.9.0");
+					dte2 = GetAutomationObject("VisualStudio.DTE.9.0");
 				if (dte2 == null)
-					dte2 = (DTE2)VocolaApi.GetAutomationObject("VisualStudio.DTE.8.0");
+					dte2 = GetAutomationObject("VisualStudio.DTE.8.0");
 				return dte2;
             }
         }
 
+        static private DTE2 GetAutomationObject(string progId)
+        {
+            return (DTE2)System.Runtime.InteropServices.Marshal.GetActiveObject(progId);
+            //return (DTE2)VocolaApi.GetAutomationObject(progId);
+        }
+
+            
 		static private int DteVersion
 		{
-			get
+get
 			{
 				float version = 0;
 				float.TryParse(DTE2.Version, out version);

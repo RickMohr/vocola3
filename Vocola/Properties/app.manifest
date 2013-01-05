@@ -4,7 +4,8 @@
      processorArchitecture="X86"
      name="Vocola"
      type="win32"/> 
-  <description>Vocola</description> 
+  <description>Vocola</description>
+  <!--
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges>
@@ -14,4 +15,5 @@
       </requestedPrivileges>
     </security>
   </trustInfo>
+-->
 </assembly>
