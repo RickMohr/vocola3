@@ -327,7 +327,7 @@ namespace Vocola
             {
                 // For application-specific grammars, emit code to skip further processing if the application isn't active
                 string moduleNamePrefix = moduleName;
-                Match match = Regex.Match(moduleName.Replace("@", "_")QueryAccessibilityHelpEventArgs., "^(.+?)_.*");
+                Match match = Regex.Match(moduleName.Replace("@", "_"), "^(.+?)_.*");
                 if (match.Success)
                     moduleNamePrefix = match.Groups[1].Value;
                 EmitLine(2, "window = matchWindow(moduleInfo, '{0}', '')", moduleNamePrefix);
