@@ -291,7 +291,7 @@
     <PostBuildEvent>"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\mt.exe" -manifest "$(ProjectDir)Properties\app.manifest" -outputresource:"$(TargetPath)";#1"
 
 REM Sign target executable
-"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\signtool.exe" sign /f "$(ProjectDir)..\..\CodeSigning\vocola.pfx" /p Vocola2 /v /t http://timestamp.verisign.com/scripts/timestamp.dll "$(TargetPath)"
+//"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\signtool.exe" sign /f "$(ProjectDir)..\..\CodeSigning\vocola.pfx" /p Vocola2 /v /t http://timestamp.verisign.com/scripts/timestamp.dll "$(TargetPath)"
 
 copy /y "$(TargetDir)*.*" "C:\Program Files (x86)\Vocola 3.2\bin"
 </PostBuildEvent>
