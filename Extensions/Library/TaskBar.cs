@@ -3,6 +3,8 @@ using ManagedWinapi.Accessibility;
 using System;
 using System.Collections.Generic;
 using Vocola;
+using System.Diagnostics;
+using System.IO;
 
 namespace Library
 {
@@ -159,12 +161,59 @@ namespace Library
         [VocolaFunction]
         static public void SwitchToApplication(string applicationName, int instance, int timeout)
         {
-            if (!RunningOnVista())
-                throw new VocolaExtensionException("This function only works in Windows Vista");
-
             applicationName = applicationName.ToLower();
             if (applicationName.EndsWith(".exe"))
                 applicationName = applicationName.Substring(0, applicationName.Length - 4);
+
+            if (RunningOnVista())
+            {
+                // This digs through the taskbar windows. Works great in Vista, but everything changed with Windows 7.
+                SwitchToApplicationVista(applicationName, instance, timeout);
+                return;
+            }
+
+            // This gets the main window of the first process with the right name.
+            // If a process has more than one window, too bad.
+            // It fails for Explorer and NatSpeak.
+            foreach (var process in Process.GetProcesses())
+            {
+                if (Path.GetFileNameWithoutExtension(process.ProcessName).ToLower() == applicationName)
+                {
+                    if (process.MainWindowHandle != IntPtr.Zero)
+                    {
+                        Win.ShowWindow(process.MainWindowHandle);
+                        Main.WaitForWindow(process.MainWindowTitle, timeout);
+                        return;
+                    }
+                }
+            }
+            /*
+            // This enumerates desktop windows
+            // If a process has more than one window it will find them, in Z-order.
+            // But you need "taskbar order" to say "Use Explorer 2". I've found no way to do that.
+            foreach (var hWnd in Win.GetDesktopWindows())
+            {
+                string processName = Win.GetAppName(hWnd);
+                //var winTitle = Win.GetWindowTitle(hWnd);
+                //var className = Win.GetWindowClassName(hWnd);
+                //Trace.WriteLine(string.Format("app = '{0}', class = '{1}', title = '{2}'", processName, className, winTitle));
+                if (processName != null && processName.ToLower() == applicationName)
+                {
+                    Win.ShowWindow(hWnd);
+                    var title = Win.GetWindowTitle(hWnd);
+                    Main.WaitForWindow(title);
+                    return;
+                }
+            }
+             */
+            throw new VocolaExtensionException("Could not switch to instance {0} of application '{1}'", instance, applicationName);
+        }
+
+        static private void SwitchToApplicationVista(string applicationName, int instance, int timeout)
+        {
+            if (!RunningOnVista())
+                throw new VocolaExtensionException("This function only works in Windows Vista");
+
             int i = 0;
             foreach (SystemAccessibleObject button in GetRunningApplicationButtons())
             {
