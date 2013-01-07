@@ -52,7 +52,7 @@ namespace Library
             IntPtr taskbarHwnd = Win.FindWindowByClassName("Shell_traywnd");
             SetForegroundWindow(taskbarHwnd);
         }
-
+        
         static public string GetForegroundAppName()
         {
             return GetAppName((IntPtr)GetForegroundWindow());
@@ -63,16 +63,15 @@ namespace Library
             try
             {
                 Process process = Process.GetProcessById(GetWindowProcessID(hWnd));
-                int nChars = 1024;
-                StringBuilder filename = new StringBuilder(nChars);
+                return process.ProcessName;
+                //uint nChars = 1024;
+                //StringBuilder filename = new StringBuilder((int)nChars);
                 //GetModuleFileNameEx(hProcess, IntPtr.Zero, filename, nChars);
-                QueryFullProcessImageName(process.Handle, false, filename, ref nChars);
-                return Path.GetFileNameWithoutExtension(filename.ToString()).ToLower();
+                //if (QueryFullProcessImageName(process.Handle, 0, filename, ref nChars) && (nChars > 0))
+                //    return Path.GetFileNameWithoutExtension(filename.ToString()).ToLower();
             }
-            catch
-            {
-                return null;
-            }
+            catch { }
+            return null;
         }
 
         static public Int32 GetWindowProcessID(IntPtr hWnd)
@@ -85,11 +84,7 @@ namespace Library
         static public string GetForegroundWindowTitle()
         {
             IntPtr hWnd = (IntPtr)GetForegroundWindow();
-            // Allocate correct string length first
-            int length = GetWindowTextLength(hWnd);
-            StringBuilder sb = new StringBuilder(length + 1);
-            GetWindowText(hWnd, sb, sb.Capacity);
-            return sb.ToString();
+            return GetWindowTitle(hWnd);
         }
 
         static public Rectangle GetForegroundWindowClientRect()
@@ -107,6 +102,15 @@ namespace Library
         static public Rectangle GetForegroundWindowRect()
         {
             return GetWindowRect((IntPtr)GetForegroundWindow());
+        }
+
+        static public string GetWindowTitle(IntPtr hWnd)
+        {
+            // Allocate correct string length first
+            int length = GetWindowTextLength(hWnd);
+            StringBuilder sb = new StringBuilder(length + 1);
+            GetWindowText(hWnd, sb, sb.Capacity);
+            return sb.ToString();
         }
 
         static private Rectangle GetWindowRect(IntPtr hWnd)
@@ -265,9 +269,103 @@ namespace Library
         [DllImport("user32.dll")] static extern bool   SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
         [DllImport("user32.dll")] static extern uint   ShowWindow(uint hwnd, int showCommand);
 
-        [DllImport("kernel32.dll")] [return: MarshalAs(UnmanagedType.Bool)] static extern bool  
-            QueryFullProcessImageName(IntPtr ProcessHandle, [MarshalAs(UnmanagedType.Bool)] bool UseNativeName, StringBuilder ExeName, ref int Size);
-        
+        /*
+        static public List<IntPtr> GetDesktopWindows()
+        {
+            var collection = new List<IntPtr>();
+            EnumDelegate filter = delegate(IntPtr hWnd, int lParam)
+            {
+                //if (!string.IsNullOrEmpty(GetWindowTitle(hWnd)))
+                if (IsUsefulDesktopWindow(hWnd))
+                    collection.Add(hWnd);
+                return true;
+            };
+            EnumDesktopWindows(IntPtr.Zero, filter, IntPtr.Zero);
+            return collection;
+        }
+
+        private static bool IsUsefulDesktopWindow(IntPtr window)
+        {
+            // http://stackoverflow.com/questions/210504/enumerate-windows-like-alt-tab-does
+            // http://blogs.msdn.com/oldnewthing/archive/2007/10/08/5351207.aspx
+            // 1. For each visible window, walk up its owner chain until you find the root owner. 
+            // 2. Then walk back down the visible last active popup chain until you find a visible window.
+            // 3. If you're back to where you're started, (look for exceptions) then put the window in the Alt+Tab list.
+            IntPtr root = GetAncestor(window, GetAncestor_Flags.GetRootOwner);
+
+            if (GetLastVisibleActivePopUpOfWindow(root) == window)
+            {
+                var className = GetWindowClassName(window);
+                if (className == "Shell_TrayWnd" ||                          //Windows taskbar
+                    className == "DV2ControlHost" ||                         //Windows startmenu, if open
+                    className == "Button" ||                                 //Windows startmenu-button.
+                    className == "MsgrIMEWindowClass" ||                     //Live messenger's notifybox i think
+                    className == "SysShadow" ||                              //Live messenger's shadow-hack
+                    className.StartsWith("WMP9MediaBarFlyout"))              //WMP's "now playing" taskbar-toolbar
+                    return false;
+                return true;
+            }
+            return false;
+        }
+
+        private static IntPtr GetLastVisibleActivePopUpOfWindow(IntPtr window)
+        {
+            IntPtr lastPopUp = GetLastActivePopup(window);
+            if (IsWindowVisible(lastPopUp))
+                return lastPopUp;
+            else if (lastPopUp == window)
+                return IntPtr.Zero;
+            else
+                return GetLastVisibleActivePopUpOfWindow(lastPopUp);
+        }
+
+        delegate bool EnumDelegate(IntPtr hWnd, int lParam);
+        [DllImport("user32.dll", EntryPoint = "EnumDesktopWindows", ExactSpelling = false, CharSet = CharSet.Auto, SetLastError = true)]
+        static extern bool EnumDesktopWindows(IntPtr hDesktop, EnumDelegate lpEnumCallbackFunction, IntPtr lParam);
+
+        enum GetAncestor_Flags
+        {
+            GetParent = 1,
+            GetRoot = 2,
+            GetRootOwner = 3
+        }
+        [DllImport("user32.dll", ExactSpelling = true)]
+        static extern IntPtr GetAncestor(IntPtr hwnd, GetAncestor_Flags gaFlags);
+
+        [DllImport("user32.dll")]
+        static extern IntPtr GetLastActivePopup(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool IsWindowVisible(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+
+        public static string GetWindowClassName(IntPtr hWnd)
+        {
+            StringBuilder className = new StringBuilder(100);
+            int success = GetClassName(hWnd, className, className.Capacity);
+            if (success != 0)
+                return className.ToString();
+            else
+                return null;
+        }
+        */
+
+        //[DllImport("kernel32.dll")] [return: MarshalAs(UnmanagedType.Bool)] static extern bool  
+           // QueryFullProcessImageName(IntPtr ProcessHandle, [MarshalAs(UnmanagedType.Bool)] bool UseNativeName, 
+        //StringBuilder ExeName, ref int Size);
+
+        //[DllImport("kernel32.dll", SetLastError = true)]
+        //static extern bool QueryFullProcessImageName(IntPtr hProcess, uint dwFlags,
+            //[Out, MarshalAs(UnmanagedType.LPTStr)] StringBuilder lpExeName,
+            //ref int lpdwSize);
+
+        //[DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //static extern bool QueryFullProcessImageName(IntPtr hProcess, uint dwFlags, StringBuilder lpExeName, ref uint lpdwSize);
+
     }
 
 }
