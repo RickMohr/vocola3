@@ -313,9 +313,11 @@ namespace Library
                 }
 				if (dte2 == null)
 					dte2 = GetAutomationObject("VisualStudio.DTE");
-				if (dte2 == null)
-					dte2 = GetAutomationObject("VisualStudio.DTE.9.0");
-				if (dte2 == null)
+                if (dte2 == null)
+                    dte2 = GetAutomationObject("VisualStudio.DTE.10.0");
+                if (dte2 == null)
+                    dte2 = GetAutomationObject("VisualStudio.DTE.9.0");
+                if (dte2 == null)
 					dte2 = GetAutomationObject("VisualStudio.DTE.8.0");
 				return dte2;
             }
@@ -323,7 +325,14 @@ namespace Library
 
         static private DTE2 GetAutomationObject(string progId)
         {
-            return (DTE2)System.Runtime.InteropServices.Marshal.GetActiveObject(progId);
+            try
+            {
+                return (DTE2)System.Runtime.InteropServices.Marshal.GetActiveObject(progId);
+            }
+            catch
+            {
+                return null;
+            }
             //return (DTE2)VocolaApi.GetAutomationObject(progId);
         }
 
