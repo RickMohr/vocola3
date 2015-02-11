@@ -380,7 +380,7 @@ namespace Vocola
                 EmitLine(3, "try: self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1}) for window ' + str(window)))",
                     moduleName, commandSet.Commands.Count);
                 EmitLine(3, "except: return");
-                EmitLine(3, "self.activate('sequence_0', window)");
+                EmitLine(3, "self.activate('sequence_0', window, noError=1)");
             }
         }
 
@@ -391,7 +391,7 @@ namespace Vocola
                 EmitLine(2, "try: self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1})'))",
                     moduleName, commandSet.Commands.Count);
                 EmitLine(2, "except: return");
-                EmitLine(2, "self.activate('sequence_0')");
+                EmitLine(2, "self.activate('sequence_0', noError=1)");
             }
         }
 
@@ -441,7 +441,7 @@ namespace Vocola
             EmitLine(level, "    try: self.vocolaConnector.LogMessage(2, unicode('  Enabling {0} commands matching: {1}'))",
                 commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
             EmitLine(level, "    except: return");
-            EmitLine(level, "    self.activate('sequence_{0}', window)", commandSet.SequenceRuleNumber);
+            EmitLine(level, "    self.activate('sequence_{0}', window, noError=1)", commandSet.SequenceRuleNumber);
         }
 
         private void EmitConditionalContextActivation(CommandSet commandSet, string ifWord, int level)
@@ -451,7 +451,7 @@ namespace Vocola
             EmitLine(level, "        try: self.vocolaConnector.LogMessage(2, unicode('  Enabling {0} commands matching: {1}'))",
                 commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
             EmitLine(level, "        except: return");
-            EmitLine(level, "        self.activate('sequence_{0}'{1})", commandSet.SequenceRuleNumber, commandSet.IsGlobal ? "" : ", window");
+            EmitLine(level, "        self.activate('sequence_{0}'{1}, noError=1)", commandSet.SequenceRuleNumber, commandSet.IsGlobal ? "" : ", window");
         }
 
         private void EmitConditionalContextDeactivation(CommandSet commandSet, string ifWord, int level)
@@ -461,7 +461,7 @@ namespace Vocola
             EmitLine(level, "        try: self.vocolaConnector.LogMessage(2, unicode('  Disabling {0} commands matching: {1}'))",
                 commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
             EmitLine(level, "        except: return");
-            EmitLine(level, "        self.deactivate('sequence_{0}')", commandSet.SequenceRuleNumber);
+            EmitLine(level, "        self.deactivate('sequence_{0}', noError=1)", commandSet.SequenceRuleNumber);
         }
 
         private string GetPredicateForWindowTitlePatterns(CommandSet commandSet, string titleVariableName)
