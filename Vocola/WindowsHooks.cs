@@ -39,7 +39,11 @@ namespace Vocola
                 {
                 case EVENT_SYSTEM_FOREGROUND:
                 case EVENT_OBJECT_NAMECHANGE:
-                    Vocola.UpdateGrammarsIfContextChanged();
+                    if (idObject == 0 && idChild == 0)
+                    {
+                        //Trace.WriteLine(LogLevel.Low, "Got Windows event {0} {1}", eventType, hWnd);
+                        Vocola.UpdateGrammarsIfContextChanged();
+                    }
                     break;
                 }
             }
