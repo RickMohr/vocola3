@@ -340,7 +340,7 @@ namespace Vocola
             EmitLine(2, "self.firstWord = 0");
             EmitLine(2, "newTitle = string.lower(moduleInfo[1])");
             EmitLine();
-
+            
             if (!commandSet.IsGlobal)
             {
                 // For application-specific grammars, commands are activated for a specific window.
@@ -724,6 +724,7 @@ import natlink
 from natlinkutils import *
 import ctypes
 from ctypes import CFUNCTYPE, c_wchar_p, c_int
+import string
 
 VocolaEnabled = True
 
@@ -795,6 +796,7 @@ def unload():
 import natlink
 from natlinkutils import *
 import ctypes
+import string
 
 class ThisGrammar(GrammarBase):
 
