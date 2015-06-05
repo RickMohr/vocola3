@@ -415,26 +415,27 @@ namespace Vocola
             }
         }
 
-        delegate void EmitContextActivationDelegate(CommandSet commandSet, string ifWord, int level);
+        delegate void EmitContextActivationDelegate(CommandSet commandSet, string ifWord, CommandSet firstCommandSet, int level);
 
         private void EmitContextActivations(CommandSet commandSet, int level, EmitContextActivationDelegate emitActivation)
         {
             foreach (List<CommandSet> ifGroup in commandSet.ConditionalCommandSets)
             {
                 bool first = true;
+                CommandSet firstCommandSet = ifGroup[0];
                 foreach (CommandSet cs in ifGroup)
                     if (cs.Commands.Count > 0)
                     {
                         string ifWord = first ? "if" : cs.WindowTitlePatterns.Count > 0 ? "elif" : "else";
                         first = false;
-                        emitActivation(cs, ifWord, level);
+                        emitActivation(cs, ifWord, firstCommandSet, level);
                         EmitLine();
                         EmitContextActivations(cs, level + 1, emitActivation);
                     }
             }
         }
 
-        private void EmitContextActivation(CommandSet commandSet, string ifWord, int level)
+        private void EmitContextActivation(CommandSet commandSet, string ifWord, CommandSet ignore, int level)
         {
             string tests = GetPredicateForWindowTitlePatterns(commandSet, "title");
             EmitLine(level, "{0} {1}:", ifWord, tests);
@@ -444,7 +445,7 @@ namespace Vocola
             EmitLine(level, "    self.activate('sequence_{0}', window, noError=1)", commandSet.SequenceRuleNumber);
         }
 
-        private void EmitConditionalContextActivation(CommandSet commandSet, string ifWord, int level)
+        private void EmitConditionalContextActivation(CommandSet commandSet, string ifWord, CommandSet ignore, int level)
         {
             EmitLine(level, "{0} {1}:", ifWord, GetPredicateForWindowTitlePatterns(commandSet, "newTitle"));
             EmitLine(level, "    if not ({0}):", GetPredicateForWindowTitlePatterns(commandSet, "oldTitle"));
@@ -454,12 +455,21 @@ namespace Vocola
             EmitLine(level, "        self.activate('sequence_{0}'{1}, noError=1)", commandSet.SequenceRuleNumber, commandSet.IsGlobal ? "" : ", window");
         }
 
-        private void EmitConditionalContextDeactivation(CommandSet commandSet, string ifWord, int level)
+        private void EmitConditionalContextDeactivation(CommandSet commandSet, string ifWord, CommandSet firstCommandSet, int level)
         {
             EmitLine(level, "{0} {1}:", ifWord, GetPredicateForWindowTitlePatterns(commandSet, "oldTitle"));
-            EmitLine(level, "    if not ({0}):", GetPredicateForWindowTitlePatterns(commandSet, "newTitle"));
-            EmitLine(level, "        try: self.vocolaConnector.LogMessage(2, unicode('  Disabling {0} commands matching: {1}'))",
-                commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
+            if (ifWord == "else")
+            {
+                EmitLine(level, "    if ({0}):", GetPredicateForWindowTitlePatterns(firstCommandSet, "newTitle"));
+                EmitLine(level, "        try: self.vocolaConnector.LogMessage(2, unicode('  Disabling {0} commands not matching: {1}'))",
+                    commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
+            }
+            else
+            {
+                EmitLine(level, "    if not ({0}):", GetPredicateForWindowTitlePatterns(commandSet, "newTitle"));
+                EmitLine(level, "        try: self.vocolaConnector.LogMessage(2, unicode('  Disabling {0} commands matching: {1}'))",
+                    commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
+            }
             EmitLine(level, "        except: return");
             EmitLine(level, "        self.deactivate('sequence_{0}', noError=1)", commandSet.SequenceRuleNumber);
         }
@@ -468,16 +478,7 @@ namespace Vocola
         {
             ArrayList patterns = new ArrayList();
             foreach (string pattern in commandSet.WindowTitlePatterns)
-                patterns.Add(String.Format("string.find({0}, {1}) >= 0", titleVariableName, MakeQuotedString(pattern.ToLower())));
-            string tests = String.Join(" or ", (string[])patterns.ToArray(typeof(string)));
-            return tests;
-        }
-
-        private string GetPrPredicateForWindowTitlePatterns(CommandSet commandSet, string titleVariableName)
-        {
-            ArrayList patterns = new ArrayList();
-            foreach (string pattern in commandSet.WindowTitlePatterns)
-                patterns.Add(String.Format("string.find({0}, {1}) >= 0", titleVariableName, MakeQuotedString(pattern.ToLower())));
+                patterns.Add(String.Format("{1} in {0}", titleVariableName, MakeQuotedString(pattern.ToLower())));
             string tests = String.Join(" or ", (string[])patterns.ToArray(typeof(string)));
             return tests;
         }
