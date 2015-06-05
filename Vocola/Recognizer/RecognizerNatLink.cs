@@ -462,7 +462,7 @@ namespace Vocola
             {
                 EmitLine(level, "    if ({0}):", GetPredicateForWindowTitlePatterns(firstCommandSet, "newTitle"));
                 EmitLine(level, "        try: self.vocolaConnector.LogMessage(2, unicode('  Disabling {0} commands not matching: {1}'))",
-                    commandSet.Commands.Count, commandSet.WindowTitlePatternsAsString);
+                    commandSet.Commands.Count, firstCommandSet.WindowTitlePatternsAsString);
             }
             else
             {
