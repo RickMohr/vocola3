@@ -1,0 +1,1 @@
+Vocola lets you create commands to control a computer by voice. It works with both Dragon NaturallySpeaking and Windows Speech Recognition. See http://vocola.net for details.
