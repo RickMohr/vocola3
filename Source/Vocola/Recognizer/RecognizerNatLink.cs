@@ -12,22 +12,23 @@ namespace Vocola
 
     public class RecognizerNatLink : Recognizer
     {
-        private string GrammarsFolder = @"C:\Programs\NatLink\NatLink\MacroSystem";
+        //private string GrammarsFolder = @"C:\Programs\NatLink\NatLink\MacroSystem";
+        private string GrammarsFolder = @"C:\Programs\natlink\src\natlinkpy\MacroSystem";
         private string NatLinkConnectorDllPath = Path.Combine(Application.StartupPath, "NatLinkConnectorC.dll");
-		public DateTime LastGrammarUpdateTime { get; private set; }
-		public DateTime LastGrammarCreationTime { get; private set; }
+        public DateTime LastGrammarUpdateTime { get; private set; }
+        public DateTime LastGrammarCreationTime { get; private set; }
 
         public override void Initialize()
         {
             ReadRegistry();
             CleanGrammarsFolder();
-			NatLinkListener.Start();
-			EmitVocolaMain();
+            NatLinkListener.Start();
+            EmitVocolaMain();
         }
 
         private void ReadRegistry()
         {
-			RegistryKey key = Registry.CurrentUser.CreateSubKey(Path.Combine(Vocola.RegistryKeyName, "NatLinkRecognizer"));
+            RegistryKey key = Registry.CurrentUser.CreateSubKey(Path.Combine(Vocola.RegistryKeyName, "NatLinkRecognizer"));
         }
 
         private void CleanGrammarsFolder()
@@ -40,7 +41,7 @@ namespace Vocola
 
         private void DeleteFile(string pathname)
         {
-            try   { File.Delete(pathname); }
+            try { File.Delete(pathname); }
             catch { Trace.WriteLine(LogLevel.Error, "Unable to delete grammar file '{0}'", pathname); }
         }
 
@@ -55,13 +56,13 @@ namespace Vocola
                 string grammarFilePath = Path.Combine(GrammarsFolder, moduleName + "_vcl.py");
                 grammarFilePath = grammarFilePath.Replace('@', '_');
                 moduleName = moduleName.ToLower();
-				if (loadedFile.ShouldActivateCommands())
-				{
-					LastGrammarUpdateTime = DateTime.Now;
-					if (!File.Exists(grammarFilePath))
-						LastGrammarCreationTime = DateTime.Now;
-					EmitGrammarFile(loadedFile.CommandSet, grammarFilePath, moduleName);
-				}
+                if (loadedFile.ShouldActivateCommands())
+                {
+                    LastGrammarUpdateTime = DateTime.Now;
+                    if (!File.Exists(grammarFilePath))
+                        LastGrammarCreationTime = DateTime.Now;
+                    EmitGrammarFile(loadedFile.CommandSet, grammarFilePath, moduleName);
+                }
             }
             catch (Exception e)
             {
@@ -69,13 +70,13 @@ namespace Vocola
             }
         }
 
-		public override void EmulateRecognize(string words)
-		{
-			bool success = NatLinkToVocolaServer.CurrentNatLinkCallbackHandler.EmulateRecognize(words);
-			if (!success)
-				throw new ActionException(null, "HearCommand() failed to recognize '{0}'", words);
-		}
-    
+        public override void EmulateRecognize(string words)
+        {
+            bool success = NatLinkToVocolaServer.CurrentNatLinkCallbackHandler.EmulateRecognize(words);
+            if (!success)
+                throw new ActionException(null, "HearCommand() failed to recognize '{0}'", words);
+        }
+
         public override void DisplayMessage(string message, bool isWarning)
         {
             Trace.WriteLine(isWarning ? LogLevel.Error : LogLevel.High, message);
@@ -84,11 +85,11 @@ namespace Vocola
         // ---------------------------------------------------------------------
         // Convert one Vocola command file to a NatLink grammar file
 
-		private void EmitGrammarFile(CommandSet commandSet, string grammarFilePath, string moduleName)
+        private void EmitGrammarFile(CommandSet commandSet, string grammarFilePath, string moduleName)
         {
             try
             {
-				using (TheOutputStream = new StreamWriter(grammarFilePath, false, System.Text.Encoding.GetEncoding(1252)))
+                using (TheOutputStream = new StreamWriter(grammarFilePath, false, System.Text.Encoding.GetEncoding(1252)))
                 {
                     EmitFileHeader();
                     EmitDictationGrammar();
@@ -103,7 +104,7 @@ namespace Vocola
             catch (Exception ex)
             {
                 Trace.WriteLine(LogLevel.Error, "Exception writing grammar file '{0}':\n {1}",
-					grammarFilePath, ex.Message);
+                    grammarFilePath, ex.Message);
             }
         }
 
@@ -139,7 +140,7 @@ namespace Vocola
         private void EmitCommandGrammar(Command command)
         {
             InlineATermIfNothingConcrete(command);
-    
+
             int firstTermIndex, lastTermIndex;
             FindTermsForMainRule(command, out firstTermIndex, out lastTermIndex);
             ArrayList mainTerms = new ArrayList(command.Terms.GetRange(firstTermIndex, lastTermIndex - firstTermIndex + 1));
@@ -175,11 +176,11 @@ namespace Vocola
                     WordTerm wt = (WordTerm)term;
                     if (IsOptionalTerm(wt))
                         Emit("[ ");
-					//string[] words = wt.Text.Split(' ');
-					//if (TermHasAlternates(words))
-					//    EmitTermWithAlternates(words);
-					//else
-						Emit("{0} ", MakeQuotedString(wt.Text));
+                    //string[] words = wt.Text.Split(' ');
+                    //if (TermHasAlternates(words))
+                    //    EmitTermWithAlternates(words);
+                    //else
+                    Emit("{0} ", MakeQuotedString(wt.Text));
                     if (IsOptionalTerm(wt))
                         Emit("] ");
                 }
@@ -213,20 +214,20 @@ namespace Vocola
             }
         }
 
-		private void EmitTermWithAlternates(string[] words)
-		{
-			foreach (string word in words)
-			{
-				if (TermHasAlternates(word))
-				{
-					var quotedAlternates = GetAlternates(word).ConvertAll(s => MakeQuotedString(s));
-					quotedAlternates.Insert(0, MakeQuotedString(word));
-					Emit("({0}) ", string.Join(" | ", quotedAlternates));
-				}
-				else
-					Emit("{0} ", MakeQuotedString(word));
-			}
-		}
+        private void EmitTermWithAlternates(string[] words)
+        {
+            foreach (string word in words)
+            {
+                if (TermHasAlternates(word))
+                {
+                    var quotedAlternates = GetAlternates(word).ConvertAll(s => MakeQuotedString(s));
+                    quotedAlternates.Insert(0, MakeQuotedString(word));
+                    Emit("({0}) ", string.Join(" | ", quotedAlternates));
+                }
+                else
+                    Emit("{0} ", MakeQuotedString(word));
+            }
+        }
 
         private bool IsOptionalTerm(object term)
         {
@@ -266,7 +267,7 @@ namespace Vocola
                 EmitSequenceRule(commandSet);
             foreach (List<CommandSet> ifGroup in commandSet.ConditionalCommandSets)
                 foreach (CommandSet cs in ifGroup)
-                     ruleNumber = EmitSequenceRules(cs, ruleNumber);
+                    ruleNumber = EmitSequenceRules(cs, ruleNumber);
             return ruleNumber;
         }
 
@@ -282,7 +283,7 @@ namespace Vocola
                 EmitLine(2, "{0} = <{1}>;", any, ruleNamesString);
             else
                 EmitLine(2, "{0} = <any_{1}>|<{2}>;", any, commandSet.ParentCommandSet.SequenceRuleNumber, ruleNamesString);
-			int nSeq = (Vocola.CommandSequencesEnabled ? commandSet.MaxSequencedCommands : 0);
+            int nSeq = (Vocola.CommandSequencesEnabled ? commandSet.MaxSequencedCommands : 0);
             EmitLine(2, "<sequence_{0}> exported = {1};",
                 commandSet.SequenceRuleNumber, GetRepeatGrammar(any, nSeq));
         }
@@ -300,8 +301,8 @@ namespace Vocola
 
         private void EmitActivations(CommandSet commandSet, string moduleName)
         {
-			bool moduleHasPrefix = false;
-			string prefix = "";
+            bool moduleHasPrefix = false;
+            string prefix = "";
             Match match = Regex.Match(moduleName, "^(.+?)_.*");
             if (match.Success)
             {
@@ -310,7 +311,7 @@ namespace Vocola
             }
             EmitLine(0, "");
             EmitLine(1, "def gotBegin(self,moduleInfo):");
-			if (commandSet.IsGlobal)
+            if (commandSet.IsGlobal)
                 EmitLine(2, "window = moduleInfo[2]");
             else
             {
@@ -326,16 +327,16 @@ namespace Vocola
             EmitLine(2, "self.currentModule = moduleInfo");
             EmitLine(0, "");
             EmitLine(2, "self.deactivateAll()");
-			if (commandSet.Commands.Count > 0)
-			{
-				EmitLine(2, "self.vocolaConnector.LogMessage(2, unicode('  Enabling commands from {0} ({1})'))",
-					moduleName, commandSet.Commands.Count);
-				if (commandSet.IsGlobal)
-					EmitLine(2, "self.activate('sequence_0')");
-				else
-					EmitLine(2, "self.activate('sequence_0', window)");
-			}
-            EmitLine(2, "title = string.lower(moduleInfo[1])");
+            if (commandSet.Commands.Count > 0)
+            {
+                EmitLine(2, "self.vocolaConnector.LogMessage(2, '  Enabling commands from {0} ({1})')",
+                    moduleName, commandSet.Commands.Count);
+                if (commandSet.IsGlobal)
+                    EmitLine(2, "self.activate('sequence_0')");
+                else
+                    EmitLine(2, "self.activate('sequence_0', window)");
+            }
+            EmitLine(2, "title = moduleInfo[1].lower()");
 
             // Emit code to activate the context's commands if one of the context
             // strings matches the current window
@@ -363,13 +364,13 @@ namespace Vocola
         {
             ArrayList patterns = new ArrayList();
             foreach (string pattern in commandSet.WindowTitlePatterns)
-                patterns.Add(String.Format("string.find(title,{0}) >= 0", MakeQuotedString(pattern)));
+                patterns.Add(String.Format("title.find({0}) >= 0", MakeQuotedString(pattern.ToLower())));
             string tests = String.Join(" or ", (string[])patterns.ToArray(typeof(string)));
             EmitLine(level, "{0} {1}:", ifWord, tests);
-			if (commandSet.IsGlobal)
-				EmitLine(level, "    try: self.activate('sequence_{0}')", commandSet.SequenceRuleNumber);
-			else
-				EmitLine(level, "    try: self.activate('sequence_{0}', window)", commandSet.SequenceRuleNumber);
+            if (commandSet.IsGlobal)
+                EmitLine(level, "    try: self.activate('sequence_{0}')", commandSet.SequenceRuleNumber);
+            else
+                EmitLine(level, "    try: self.activate('sequence_{0}', window)", commandSet.SequenceRuleNumber);
             EmitLine(level, "    except BadWindow: pass");
         }
 
@@ -393,8 +394,8 @@ namespace Vocola
 
             EmitLine(1, "# {0}", command.TermsToString());
             EmitLine(1, "def {0}(self, words, fullResults):", functionName);
-			EmitLine(2, "if self.firstWord == 0: self.logSpokenCommand(fullResults)");
-			EmitOptionalTermFixup(terms);
+            EmitLine(2, "if self.firstWord == 0: self.logSpokenCommand(fullResults)");
+            EmitOptionalTermFixup(terms);
             EmitLine(2, "variableTerms = ''");
 
             int termNumber = 0;
@@ -411,10 +412,10 @@ namespace Vocola
                     EmitLine(2, "variableTerms += fullResults[{0} + self.firstWord][0] + '\\n'", termNumber);
                 termNumber++;
             }
-			//EmitLine(2, "print 'calling RunActions()'");
-			EmitLine(2, "self.vocolaConnector.RunActions(unicode('{0}'), unicode(variableTerms))", command.UniqueId);
-			//EmitLine(2, "print 'returned from RunActions()'");
-			EmitLine(2, "self.firstWord += {0}", nTerms);
+            //EmitLine(2, "print('calling RunActions()')");
+            EmitLine(2, "self.vocolaConnector.RunActions('{0}', variableTerms)", command.UniqueId);
+            //EmitLine(2, "print('returned from RunActions()')");
+            EmitLine(2, "self.firstWord += {0}", nTerms);
 
             // If repeating a command with no <variable> terms (e.g. "Scratch That
             // Scratch That"), our gotResults function will be called only once, with
@@ -454,7 +455,7 @@ namespace Vocola
                     EmitLine(2, "if opt >= len(fullResults) or fullResults[opt][0] != '{0}':", ((WordTerm)term).Text);
                     EmitLine(3, "fullResults.insert(opt, 'dummy')");
                 }
-            }   
+            }
         }
 
         // ---------------------------------------------------------------------------
@@ -479,7 +480,7 @@ namespace Vocola
         //    <1a> = 'Words' ;
 
         static private Regex FirstTermRegex = new Regex("^(v*o+v[ov]*c)", RegexOptions.Compiled);
-        static private Regex LastTermRegex  = new Regex("^([ov]*c[co]*)v+[co]+", RegexOptions.Compiled);
+        static private Regex LastTermRegex = new Regex("^([ov]*c[co]*)v+[co]+", RegexOptions.Compiled);
 
         private void FindTermsForMainRule(Command command, out int firstTermIndex, out int lastTermIndex)
         {
@@ -571,14 +572,14 @@ namespace Vocola
 
         public void Emit(string text, params object[] arguments)
         {
-			Emit(0, text, arguments);
+            Emit(0, text, arguments);
         }
 
-		public void Emit(int level, string text, params object[] arguments)
-		{
-			TheOutputStream.Write(new string(' ', 4 * level));
-			TheOutputStream.Write(text, arguments);
-		}
+        public void Emit(int level, string text, params object[] arguments)
+        {
+            TheOutputStream.Write(new string(' ', 4 * level));
+            TheOutputStream.Write(text, arguments);
+        }
 
         public void EmitLine(int level, string text, params object[] arguments)
         {
@@ -596,14 +597,14 @@ namespace Vocola
         }
 
         // ---------------------------------------------------------------------------
-		// Emit _vocola_main.py (grammar file treated specially by NatLink)
+        // Emit _vocola_main.py (grammar file treated specially by NatLink)
 
-		private void EmitVocolaMain()
-		{
-			string path = Path.Combine(GrammarsFolder, "_vocola_main.py");
-			using (TheOutputStream = new StreamWriter(path, false, Encoding.GetEncoding(1252)))
-			{
-				Emit(@"
+        private void EmitVocolaMain()
+        {
+            string path = Path.Combine(GrammarsFolder, "_vocola_main.py");
+            using (TheOutputStream = new StreamWriter(path, false, Encoding.GetEncoding(1252)))
+            {
+                Emit(@"
 import natlink
 from natlinkutils import *
 import ctypes
@@ -616,13 +617,13 @@ class ThisGrammar(GrammarBase):
     def initialize(self):
         global vocolaConnector
 ");
-				EmitLine(2, "vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
-				EmitLine(2, "connected = vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
-				EmitLine(2, "if connected == 0:");
-				EmitLine(2, "    print 'Vocola is enabled but not running'");
-				EmitLine(2, "    return");
-				EmitLine(2, "print 'Vocola {0} starting...'", Vocola.Version);
-				Emit(@"
+                EmitLine(2, "vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
+                EmitLine(2, "connected = vocolaConnector.InitializeConnection(r'{0}')", Path.GetDirectoryName(NatLinkConnectorDllPath));
+                EmitLine(2, "if connected == 0:");
+                EmitLine(2, "    print('Vocola is enabled but not running')");
+                EmitLine(2, "    return");
+                EmitLine(2, "print('Vocola {0} starting...')", Vocola.Version);
+                Emit(@"
         MYFUNCTYPE = CFUNCTYPE(c_int, c_wchar_p)
         self.myFunc = MYFUNCTYPE(emulateRecognize)
         vocolaConnector.SetCallbacks(self.myFunc)
@@ -639,7 +640,7 @@ def vocolaBeginCallback(moduleInfo):
     result = 0
     try: result = vocolaConnector.HaveAnyGrammarFilesChanged()
     except: pass
-    #print 'vocola files changed: %i'% result
+    #print('vocola files changed: %i')% result
     return result
 
 def emulateRecognize(words):
@@ -656,15 +657,15 @@ def unload():
     if thisGrammar: thisGrammar.unload()
     thisGrammar = None
 ");
-			}
-		}
+            }
+        }
 
-		// ---------------------------------------------------------------------------
-		// Emit pieces of Python grammar files
+        // ---------------------------------------------------------------------------
+        // Emit pieces of Python grammar files
 
         private void EmitFileHeader()
         {
-            EmitLine(0, "# NatLink macro definitions, for Dragon NaturallySpeaking"); 
+            EmitLine(0, "# NatLink macro definitions, for Dragon NaturallySpeaking");
             EmitLine(0, "# coding: Latin-1");
             EmitLine(0, "# Generated by Vocola {0}, {1}", Vocola.VersionString, DateTime.Now);
             Emit(@"
@@ -683,11 +684,11 @@ class ThisGrammar(GrammarBase):
             EmitLine(0, "");
             EmitLine(0, "\"\"\"");
             EmitLine(1, "def initialize(self):");
-			EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
-			EmitLine(2, "connected = self.vocolaConnector.InitializeConnection(unicode(r'{0}'))", Path.GetDirectoryName(NatLinkConnectorDllPath));
-			EmitLine(2, "if connected == 0: return");
-			EmitLine(2, "print 'Loading Vocola commands for {0}'", moduleName);
-			Emit(@"
+            EmitLine(2, "self.vocolaConnector = ctypes.windll.LoadLibrary(r'{0}')", NatLinkConnectorDllPath);
+            EmitLine(2, "connected = self.vocolaConnector.InitializeConnection(r'{0}')", Path.GetDirectoryName(NatLinkConnectorDllPath));
+            EmitLine(2, "if connected == 0: return");
+            EmitLine(2, "print('Loading Vocola commands for {0}')", moduleName);
+            Emit(@"
         self.load(self.gramSpec)
         self.currentModule = ("","",0)
 ");
@@ -699,10 +700,10 @@ class ThisGrammar(GrammarBase):
     # Massage recognition results to make a single entry for each <dgndictation> result.
 
     def logSpokenCommand(self, fullResults):
-		words = map(lambda t : t[0], fullResults)
-		phrase = ' '.join(words)
-		self.vocolaConnector.LogMessage(1, 'Command: ' + unicode(phrase))
-		if words == 1: print self.myFunc # hack to keep myFunc from being deallocated
+        words = map(lambda t : t[0], fullResults)
+        phrase = ' '.join(words)
+        self.vocolaConnector.LogMessage(1, 'Command: ' + phrase)
+        if words == 1: print(self.myFunc) # hack to keep myFunc from being deallocated
 
     def combineDictationWords(self, fullResults):
         i = 0
@@ -712,7 +713,7 @@ class ThisGrammar(GrammarBase):
                 # This word came from a 'recognize anything' rule.
                 # Convert to written form if necessary, e.g. '@\at-sign' --> '@'
                 word = fullResults[i][0]
-                backslashPosition = string.find(word, '\\')
+                backslashPosition = word.find('\\')
                 if backslashPosition > 0:
                     word = word[:backslashPosition]
                 if inDictation:

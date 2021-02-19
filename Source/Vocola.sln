@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31005.135
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", "{8F978F57-33D9-416C-A4EC-CDE38487470F}"
 	ProjectSection(SolutionItems) = preProject
 		ThirdParty\Interop.SpeechLib.5.3.dll = ThirdParty\Interop.SpeechLib.5.3.dll
@@ -13,8 +15,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VocolaExtension", "VocolaExtension\VocolaExtension.csproj", "{DC4C207D-7A69-4093-B486-61CFD2241F3F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio", "Extensions\VisualStudio\VisualStudio.csproj", "{A85EC387-CF28-4170-A561-CB5FEE365D35}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SapiHelper", "SapiHelper\SapiHelper.vcxproj", "{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VocolaFunctionLibrary", "Extensions\Library\VocolaFunctionLibrary.csproj", "{4E2202A4-10B6-4ED8-B978-CD84ED176CE3}"
 EndProject
@@ -38,10 +38,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vocola", "Vocola\Vocola.csproj", "{FD978287-EF75-4E10-8707-9EEFECD6E128}"
 EndProject
 Global
-	GlobalSection(SubversionScc) = preSolution
-		Svn-Managed = True
-		Manager = AnkhSVN - Subversion Support for Visual Studio
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -81,20 +77,6 @@ Global
 		{A85EC387-CF28-4170-A561-CB5FEE365D35}.Release|Win32.ActiveCfg = Release|Any CPU
 		{A85EC387-CF28-4170-A561-CB5FEE365D35}.Release|x86.ActiveCfg = Release|Any CPU
 		{A85EC387-CF28-4170-A561-CB5FEE365D35}.Release|x86.Build.0 = Release|Any CPU
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Debug|Win32.ActiveCfg = Debug|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Debug|Win32.Build.0 = Debug|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Debug|x86.ActiveCfg = Debug|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Debug|x86.Build.0 = Debug|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Release|Any CPU.ActiveCfg = Release|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Release|Win32.ActiveCfg = Release|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Release|Win32.Build.0 = Release|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Release|x86.ActiveCfg = Release|Win32
-		{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}.Release|x86.Build.0 = Release|Win32
 		{4E2202A4-10B6-4ED8-B978-CD84ED176CE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4E2202A4-10B6-4ED8-B978-CD84ED176CE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E2202A4-10B6-4ED8-B978-CD84ED176CE3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -220,5 +202,12 @@ Global
 		{A85EC387-CF28-4170-A561-CB5FEE365D35} = {9F38664E-F1E0-4C00-BA42-9106C9A43B2C}
 		{4E2202A4-10B6-4ED8-B978-CD84ED176CE3} = {9F38664E-F1E0-4C00-BA42-9106C9A43B2C}
 		{4957FC04-1E91-41C3-9121-04811D994453} = {9F38664E-F1E0-4C00-BA42-9106C9A43B2C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2FAA5BD2-FAD9-4671-B0FF-C6CC3E1D8DBC}
+	EndGlobalSection
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
 	EndGlobalSection
 EndGlobal
