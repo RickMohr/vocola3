@@ -89,6 +89,10 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.JScript" />
+    <Reference Include="SapiHelper, Version=1.0.5724.22756, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ThirdParty\SapiHelper.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -232,9 +236,9 @@
       <Project>{B8DE1AC1-4521-4E03-96A3-678A01F9D9A7}</Project>
       <Name>NatLinkToVocolaClient</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SapiHelper\SapiHelper.vcxproj">
-      <Project>{07678DC8-718E-46F1-AD8F-A50F4A8CC31D}</Project>
-      <Name>SapiHelper</Name>
+    <ProjectReference Include="..\NatLinkConnectorC\NatLinkConnectorC.vcxproj">
+      <Project>{db86494f-9df0-4213-96f2-5b98e089ca41}</Project>
+      <Name>NatLinkConnectorC</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty\Grammatica-1.4-Runtime\Grammatica-1.4-Runtime.csproj">
       <Project>{CC2DD706-AEED-4F3F-AA0F-80A045F00601}</Project>
@@ -284,7 +288,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>cd $(ProjectDir)\Parser &amp; "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\nmake.exe"</PreBuildEvent>
+    <PreBuildEvent>cd $(ProjectDir)\Parser &amp; "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\bin\Hostx64\x64\nmake.exe""</PreBuildEvent>
     <PostBuildEvent>REM "C:\Program Files\Microsoft Visual Studio 8\VC\bin\mt.exe" -manifest "$(ProjectDir)Properties\app.manifest" -outputresource:"$(TargetPath)";#1"
 
 REM Sign target executable

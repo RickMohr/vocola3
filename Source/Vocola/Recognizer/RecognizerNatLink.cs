@@ -12,7 +12,7 @@ namespace Vocola
 
     public class RecognizerNatLink : Recognizer
     {
-        private string GrammarsFolder = @"C:\Programs\NatLink\NatLink\MacroSystem";
+        private string GrammarsFolder = @"C:\NatLink\NatLink\MacroSystem";
         private string NatLinkConnectorDllPath = Path.Combine(Application.StartupPath, "NatLinkConnectorC.dll");
 		public DateTime LastGrammarUpdateTime { get; private set; }
 		public DateTime LastGrammarCreationTime { get; private set; }
@@ -335,7 +335,7 @@ namespace Vocola
 				else
 					EmitLine(2, "self.activate('sequence_0', window)");
 			}
-            EmitLine(2, "title = string.lower(moduleInfo[1])");
+            EmitLine(2, "title = moduleInfo[1]");
 
             // Emit code to activate the context's commands if one of the context
             // strings matches the current window
@@ -363,7 +363,7 @@ namespace Vocola
         {
             ArrayList patterns = new ArrayList();
             foreach (string pattern in commandSet.WindowTitlePatterns)
-                patterns.Add(String.Format("string.find(title,{0}) >= 0", MakeQuotedString(pattern)));
+                patterns.Add(String.Format("title.find({0}) >= 0", MakeQuotedString(pattern)));
             string tests = String.Join(" or ", (string[])patterns.ToArray(typeof(string)));
             EmitLine(level, "{0} {1}:", ifWord, tests);
 			if (commandSet.IsGlobal)
@@ -600,7 +600,7 @@ namespace Vocola
 
 		private void EmitVocolaMain()
 		{
-			string path = Path.Combine(GrammarsFolder, "_vocola_main.py");
+			string path = Path.Combine(GrammarsFolder, "_vocola3_main.py");
 			using (TheOutputStream = new StreamWriter(path, false, Encoding.GetEncoding(1252)))
 			{
 				Emit(@"
@@ -712,7 +712,7 @@ class ThisGrammar(GrammarBase):
                 # This word came from a 'recognize anything' rule.
                 # Convert to written form if necessary, e.g. '@\at-sign' --> '@'
                 word = fullResults[i][0]
-                backslashPosition = string.find(word, '\\')
+                backslashPosition = word.find('\\')
                 if backslashPosition > 0:
                     word = word[:backslashPosition]
                 if inDictation:
