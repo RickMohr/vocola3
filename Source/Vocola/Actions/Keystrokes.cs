@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -57,8 +58,9 @@ namespace Vocola
 
     public class Keystrokes1
     {
-
         private List<Keystroke> TheKeystrokes;
+        private static bool UseNatlinkSendKeys = true;
+        //private static bool UseNatlinkSendKeys = false;
 
         // ---------------------------------------------------------------------
         // Entry points
@@ -76,8 +78,18 @@ namespace Vocola
 
         static public void SendKeys(string keys)
         {
-            Keystrokes1 ks = new Keystrokes1(keys);
-            ks.SendKeys();
+            if (UseNatlinkSendKeys)
+            {
+                Trace.WriteLine(LogLevel.Low, "    Keystrokes: '{0}'", keys);
+                bool success = NatLinkToVocolaServer.CurrentNatLinkCallbackHandler.SendKeys(keys);
+                if (!success)
+                    throw new ActionException(null, "SendKeys() failed on '{0}'", keys);
+            }
+            else
+            {
+                Keystrokes1 ks = new Keystrokes1(keys);
+                ks.SendKeys();
+            }
         }
 
         static public void SendText(string text)

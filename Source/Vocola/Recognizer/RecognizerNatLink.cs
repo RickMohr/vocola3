@@ -75,7 +75,7 @@ namespace Vocola
 			if (!success)
 				throw new ActionException(null, "HearCommand() failed to recognize '{0}'", words);
 		}
-    
+
         public override void DisplayMessage(string message, bool isWarning)
         {
             Trace.WriteLine(isWarning ? LogLevel.Error : LogLevel.High, message);
@@ -608,6 +608,8 @@ import natlink
 from natlinkutils import *
 import ctypes
 from ctypes import CFUNCTYPE, c_wchar_p, c_int
+import vocola_ext_keys
+from _vortex import pre_action
 
 VocolaEnabled = True
 
@@ -624,8 +626,9 @@ class ThisGrammar(GrammarBase):
 				EmitLine(2, "print 'Vocola {0} starting...'", Vocola.Version);
 				Emit(@"
         MYFUNCTYPE = CFUNCTYPE(c_int, c_wchar_p)
-        self.myFunc = MYFUNCTYPE(emulateRecognize)
-        vocolaConnector.SetCallbacks(self.myFunc)
+        self.emulateRecognizeFunc = MYFUNCTYPE(emulateRecognize)
+        self.sendKeysFunc = MYFUNCTYPE(sendKeys)
+        vocolaConnector.SetCallbacks(self.emulateRecognizeFunc, self.sendKeysFunc)
 
 # When speech is heard, vocolaBeginCallback is called (from natlinkmain) before any others.
 # Return values indicate whether Vocola has changed any .py files since the last call:
@@ -647,6 +650,13 @@ def emulateRecognize(words):
     except: return -1
     return 0
 
+def sendKeys(keys):
+    pre_action(keys, None)
+    try: vocola_ext_keys.send_input(keys)
+    except Exception as e:
+        print('send_input failed: ' + repr(e))
+        return -1
+    return 0
 
 thisGrammar = ThisGrammar()
 thisGrammar.initialize()
@@ -702,7 +712,10 @@ class ThisGrammar(GrammarBase):
 		words = map(lambda t : t[0], fullResults)
 		phrase = ' '.join(words)
 		self.vocolaConnector.LogMessage(1, 'Command: ' + unicode(phrase))
-		if words == 1: print self.myFunc # hack to keep myFunc from being deallocated
+		if words == 1: 
+			# hack to keep functions from being deallocated
+			print self.emulateRecognizeFunc
+			print self.sendKeysFunc
 
     def combineDictationWords(self, fullResults):
         i = 0

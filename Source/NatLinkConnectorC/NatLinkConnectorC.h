@@ -14,6 +14,7 @@ using namespace System::Windows::Forms;
 static bool Initialized = false;
 static wchar_t VocolaExecutionFolder[1000];
 static int (*fpEmulateRecognize)(const wchar_t* words);
+static int (*fpSendKeys)(const wchar_t* keys);
 
 Assembly^ CurrentDomain_AssemblyResolve(Object^ sender, ResolveEventArgs^ args)
 {
@@ -62,7 +63,7 @@ extern "C"
 			// The executing AppDomain's "CodeBase" is the Python executable folder, so we have to specify how to find assemblies
 			AppDomain::CurrentDomain->AssemblyResolve += gcnew ResolveEventHandler(CurrentDomain_AssemblyResolve);
 
-			// If InitializeConnection() isn't called in a separate function the assembly load fails before the resolver is established
+			// If InitializeConnection() isn't called in a separate the assembly load fails before the resolver is established
 			Initialized = ReallyInitializeConnection();
 			return (Initialized ? 1 : 0);
 		}
@@ -72,9 +73,12 @@ extern "C"
 		}
 	}
 
-	void __declspec(dllexport) __stdcall SetCallbacks(int (*fpNatLinkEmulateRecognize)(const wchar_t* words))
+	void __declspec(dllexport) __stdcall SetCallbacks(
+		int (*fpNatLinkEmulateRecognize)(const wchar_t* words),
+		int (*fpNatLinkSendKeys)(const wchar_t* keys))
 	{
 		fpEmulateRecognize = fpNatLinkEmulateRecognize;
+		fpSendKeys = fpNatLinkSendKeys;
 	}
 
 	// NatLink to Vocola
@@ -99,5 +103,10 @@ extern "C"
 	int __declspec(dllexport) NatLinkEmulateRecognize(const wchar_t* words)
 	{
 		return fpEmulateRecognize(words);
+	}
+
+	int __declspec(dllexport) NatLinkSendKeys(const wchar_t* keys)
+	{
+		return fpSendKeys(keys);
 	}
 }

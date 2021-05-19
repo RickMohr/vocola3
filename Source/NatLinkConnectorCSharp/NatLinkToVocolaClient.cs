@@ -107,6 +107,14 @@ namespace Vocola
 			return CallbackSucceeded;
 		}
 
+		public bool SendKeys(string keys)
+		{
+			CallbackThunk = () => NatLinkSendKeys(keys);
+			CallbackRequestWaitHandle.Set();
+			CallbackDoneWaitHandle.WaitOne();
+			return CallbackSucceeded;
+		}
+
 		public void ActionsDone()
 		{
 			CallbackThunk = null;
@@ -117,7 +125,8 @@ namespace Vocola
 
 		[DllImport("NatLinkConnectorC.dll", CharSet=CharSet.Unicode)]
 		private static extern int NatLinkEmulateRecognize(string words);
-
+		[DllImport("NatLinkConnectorC.dll", CharSet = CharSet.Unicode)]
+		private static extern int NatLinkSendKeys(string keys);
 	}
 
 }
