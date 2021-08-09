@@ -80,8 +80,9 @@ namespace Vocola
         {
             if (UseNatlinkSendKeys)
             {
-                Trace.WriteLine(LogLevel.Low, "    Keystrokes: '{0}'", keys);
+                Trace.WriteLine(LogLevel.Low, "failed on    Keystrokes: '{0}'", keys);
                 bool success = NatLinkToVocolaServer.CurrentNatLinkCallbackHandler.SendKeys(keys);
+                Thread.Sleep(100); // NatLink key sender doesn't wait for completion
                 if (!success)
                     throw new ActionException(null, "SendKeys() failed on '{0}'", keys);
             }
